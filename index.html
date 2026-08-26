@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cutting Table — Quilt Template Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --mat: #1c4a3d;
+    --mat-deep: #143a30;
+    --mat-line: #3f7864;
+    --grid-line: rgba(232, 224, 180, 0.14);
+    --grid-line-major: rgba(232, 224, 180, 0.26);
+    --amber: #eab53d;
+    --amber-soft: #f0c463;
+    --paper: #faf7ef;
+    --paper-dim: #f0ead9;
+    --ink: #1c1a14;
+    --ink-soft: #5a5548;
+    --cream: #f3efe1;
+    --cream-dim: #c9c3ac;
+    --cut: #c8433a;
+    --seam: #33608f;
+    --ok: #5c9e6d;
+    --warn: #d68a2c;
+    --radius: 3px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background: var(--mat);
+    color: var(--cream);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body{
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(var(--grid-line-major) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line-major) 1px, transparent 1px);
+    background-size: 16px 16px, 16px 16px, 80px 80px, 80px 80px;
+    background-position: -1px -1px;
+  }
+
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 28px 90px;
+  }
+
+  /* ---------- Ruler tick divider (signature element) ---------- */
+  .ruler{
+    width:100%;
+    height: 22px;
+    display:block;
+    margin: 6px 0 28px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    padding: 48px 0 0;
+  }
+  .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--amber-soft);
+    margin: 0 0 14px;
+  }
+  h1{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(34px, 5vw, 54px);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    margin: 0 0 16px;
+    color: var(--cream);
+  }
+  h1 span{ color: var(--amber); }
+  .lede{
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--cream-dim);
+    max-width: 640px;
+    margin: 0 0 8px;
+  }
+
+  /* ---------- Upload zone ---------- */
+  .dropzone{
+    margin-top: 30px;
+    border: 1.5px dashed var(--mat-line);
+    border-radius: var(--radius);
+    background: rgba(250, 247, 239, 0.03);
+    padding: 34px 28px;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .dropzone:hover, .dropzone.drag{
+    border-color: var(--amber);
+    background: rgba(234, 181, 61, 0.06);
+  }
+  .dropzone .dz-left{ display:flex; align-items:center; gap:18px; }
+  .dropzone svg{ flex-shrink:0; width:38px; height:38px; color: var(--amber-soft); }
+  .dz-title{ font-family: var(--font-display); font-weight:600; font-size:17px; color:var(--cream); margin:0 0 4px;}
+  .dz-sub{ font-size: 13px; color: var(--cream-dim); font-family: var(--font-mono); }
+  .btn{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    background: var(--amber);
+    color: var(--mat-deep);
+    border: none;
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform .1s ease, background .15s ease;
+    white-space: nowrap;
+  }
+  .btn:hover{ background: var(--amber-soft); }
+  .btn:active{ transform: translateY(1px); }
+  .btn:disabled{ background: var(--cream-dim); color: var(--ink-soft); cursor: not-allowed; }
+  .btn.ghost{
+    background: transparent; color: var(--cream); border: 1px solid var(--mat-line);
+  }
+  .btn.ghost:hover{ border-color: var(--amber-soft); background: rgba(234,181,61,0.08); }
+  #fileInput{ display:none; }
+
+  .filebar{
+    display:none;
+    margin-top: 14px;
+    align-items:center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--amber-soft);
+  }
+  .filebar.show{ display:flex; }
+  .filebar .fname{ color: var(--cream); }
+
+  .error-box{
+    display:none;
+    margin-top:16px;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    background: rgba(200, 67, 58, 0.12);
+    border: 1px solid rgba(200, 67, 58, 0.5);
+    color: #f4c9c5;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .error-box.show{ display:block; }
+
+  /* ---------- Summary strip ---------- */
+  .summary{
+    display:none;
+    margin-top: 26px;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .summary.show{ display:flex; }
+  .stat{
+    background: rgba(250,247,239,0.05);
+    border: 1px solid var(--mat-line);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    min-width: 130px;
+    flex: 1;
+  }
+  .stat .num{ font-family: var(--font-display); font-size: 26px; font-weight:700; color: var(--amber); line-height:1;}
+  .stat .lbl{ font-family: var(--font-mono); font-size: 11px; color: var(--cream-dim); text-transform:uppercase; letter-spacing:0.06em; margin-top:6px;}
+  .stat.match .num{ color: var(--ok); }
+
+  /* ---------- Main panels ---------- */
+  section.panels{ display:none; margin-top: 10px; }
+  section.panels.show{ display:block; }
+
+  .panel-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-top: 10px;
+  }
+  @media (max-width: 880px){ .panel-grid{ grid-template-columns: 1fr; } }
+
+  .panel{
+    background: var(--paper);
+    border-radius: var(--radius);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .panel-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 12px 16px;
+    background: var(--paper-dim);
+    border-bottom: 1px solid #e2dac3;
+  }
+  .panel-head h3{
+    font-family: var(--font-display); font-size: 14px; margin:0; color: var(--ink);
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .legend{ display:flex; gap:12px; font-family: var(--font-mono); font-size:11px; color: var(--ink-soft); flex-wrap: wrap; max-width: 55%; justify-content: flex-end; }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend i{ width:14px; height:2px; display:inline-block; }
+  .panel canvas{ width:100%; display:block; background: var(--paper); cursor: default; }
+
+  .piece-tip{
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    padding: 8px 16px;
+    border-top: 1px solid #e2dac3;
+    min-height: 34px;
+  }
+  .piece-tip b{ color: var(--ink); }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    margin-top: 22px;
+    background: rgba(250,247,239,0.05);
+    border: 1px solid var(--mat-line);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 18px 22px;
+  }
+  .field label{
+    display:block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--amber-soft);
+    margin-bottom: 7px;
+  }
+  .field input[type=number]{
+    width: 100%;
+    background: var(--mat-deep);
+    border: 1px solid var(--mat-line);
+    color: var(--cream);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    padding: 9px 10px;
+    border-radius: var(--radius);
+  }
+  .field input[type=number]:focus{ outline: 2px solid var(--amber); outline-offset: 1px; }
+  .field.checkrow{ display:flex; align-items:center; gap:9px; padding-top: 22px; }
+  .field.checkrow input{ width:16px; height:16px; accent-color: var(--amber); }
+  .field.checkrow label{ margin:0; font-size:12.5px; text-transform:none; letter-spacing:0; color: var(--cream); font-family: var(--font-body); }
+  .field .hint{ font-size: 11px; color: var(--cream-dim); margin-top: 5px; font-family: var(--font-mono); }
+
+  /* ---------- Table ---------- */
+  .table-wrap{
+    margin-top: 26px;
+    background: var(--paper);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  table{ width:100%; border-collapse: collapse; }
+  thead th{
+    text-align:left;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    background: var(--paper-dim);
+    padding: 10px 14px;
+    border-bottom: 1px solid #e2dac3;
+  }
+  tbody td{
+    padding: 11px 14px;
+    font-size: 13.5px;
+    color: var(--ink);
+    border-bottom: 1px solid #ece5d1;
+    font-family: var(--font-mono);
+  }
+  tbody tr:last-child td{ border-bottom:none; }
+  .swatch{ width:13px; height:13px; border-radius:2px; display:inline-block; margin-right:8px; vertical-align:-1px; }
+  .shape-name{ font-family: var(--font-body); font-weight:600; color: var(--ink); }
+
+  /* ---------- Download bar ---------- */
+  .download-bar{
+    margin-top: 26px;
+    display:flex;
+    align-items:center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .download-note{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--cream-dim);
+    flex: 1;
+    min-width: 220px;
+  }
+
+  /* ---------- Footer ---------- */
+  footer{
+    margin-top: 60px;
+    padding-top: 22px;
+    border-top: 1px solid var(--mat-line);
+    font-size: 13px;
+    color: var(--cream-dim);
+    line-height: 1.7;
+  }
+  footer strong{ color: var(--cream); }
+  footer a{ color: var(--amber-soft); }
+
+  ::selection{ background: var(--amber); color: var(--mat-deep); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Piecing pattern → seam-allowance templates</p>
+    <h1>Cutting <span>Table</span></h1>
+    <p class="lede">Drop in a DXF piecing pattern. It finds every closed piece, groups the ones that are the same size and shape, and hands back one 3D-printable template per unique size — each outlined with a seam allowance, ready for Shapr3D.</p>
+  </header>
+
+  <svg class="ruler" id="rulerSvg" preserveAspectRatio="none"></svg>
+
+  <div class="dropzone" id="dropzone" tabindex="0">
+    <div class="dz-left">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M7 9l5-5 5 5"/><path d="M12 4v13"/></svg>
+      <div>
+        <p class="dz-title">Drop a .dxf pattern here</p>
+        <p class="dz-sub">or click to browse — parsing happens entirely in your browser</p>
+      </div>
+    </div>
+    <button class="btn" type="button" id="browseBtn">Choose File</button>
+    <input type="file" id="fileInput" accept=".dxf">
+  </div>
+  <div class="filebar" id="filebar"><span>&#9679;</span> <span class="fname" id="fname"></span></div>
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="summary" id="summary"></div>
+
+  <section class="panels" id="panels">
+
+    <div class="controls" id="controls">
+      <div class="field">
+        <label for="allowance">Seam allowance (in)</label>
+        <input type="number" id="allowance" value="0.25" step="0.05" min="0">
+      </div>
+      <div class="field">
+        <label for="scale">Pattern scale ×</label>
+        <input type="number" id="scale" value="1" step="0.1" min="0.01">
+        <div class="hint">resizes pieces before offsetting; allowance stays a true 0.25"</div>
+      </div>
+      <div class="field">
+        <label for="columns">Templates per row</label>
+        <input type="number" id="columns" value="4" step="1" min="1" max="10">
+      </div>
+      <div class="field">
+        <label for="gap">Spacing between (in)</label>
+        <input type="number" id="gap" value="0.75" step="0.25" min="0">
+      </div>
+      <div class="field checkrow">
+        <input type="checkbox" id="includeSeam" checked>
+        <label for="includeSeam">Include stitch line (finished-size outline)</label>
+      </div>
+      <div class="field checkrow">
+        <input type="checkbox" id="includeLabels" checked>
+        <label for="includeLabels">Include text labels (preview + SVG)</label>
+      </div>
+      <div class="field checkrow" style="grid-column: 1 / -1;">
+        <input type="checkbox" id="includeDxfText">
+        <label for="includeDxfText">Also add text to the DXF <span style="color:var(--cream-dim)">(most CAD apps, incl. Shapr3D, ignore/reject DXF text — leave off)</span></label>
+      </div>
+    </div>
+
+    <div class="panel-grid">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Source Pattern</h3>
+          <div class="legend" id="sourceLegend"></div>
+        </div>
+        <canvas id="sourceCanvas" width="600" height="520"></canvas>
+        <div class="piece-tip" id="sourceTip">Hover a piece to see which size group it belongs to.</div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Template Sheet</h3>
+          <div class="legend"><span><i style="background:var(--cut)"></i>cut line</span><span><i style="background:var(--seam)"></i>stitch line</span></div>
+        </div>
+        <canvas id="outputCanvas" width="600" height="520"></canvas>
+        <div class="piece-tip" id="outputTip">One template per unique size — reuse it for every matching piece in the quilt.</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th></th><th>Shape</th><th>Cut ×</th><th>Finished size</th><th>Template size (+allowance)</th></tr>
+        </thead>
+        <tbody id="shapeTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="download-bar">
+      <button class="btn" id="downloadDxfBtn">Download Template DXF</button>
+      <button class="btn ghost" id="downloadSvgBtn">Download SVG</button>
+      <p class="download-note">Each piece is one layer (e.g. "3_RIGHT_ISOSCELES_TRIANGLE") holding both the cut line and stitch line, so you can select the whole layer in Shapr3D and extrude the ring between them as the seam allowance in one step.</p>
+    </div>
+
+  </section>
+
+  <footer>
+    <p><strong>How grouping works:</strong> pieces are matched by side lengths and interior angles, so two pieces of the same size and shape end up as one template regardless of position or rotation in the original pattern.</p>
+    <p><strong>How the allowance is added:</strong> each edge is pushed outward by the allowance amount and re-joined at the corners (a true miter), the standard way seam allowance is added to a piecing template. Very sharp points are beveled automatically so they stay printable.</p>
+    <p>Runs entirely client-side — nothing is uploaded anywhere.</p>
+  </footer>
+
+</div>
+
+<script>
+/* =========================================================================
+   ENGINE — DXF parsing, planar face tracing, offsetting, DXF writing
+   ========================================================================= */
+(function(){
+
+function parseDxfPairs(text) {
+  const lines = text.split(/\r\n|\r|\n/);
+  const pairs = [];
+  for (let i = 0; i + 1 < lines.length; i += 2) {
+    const code = parseInt(lines[i].trim(), 10);
+    const value = lines[i + 1];
+    pairs.push([code, value]);
+  }
+  return pairs;
+}
+
+function bulgeToArcPoints(x1, y1, x2, y2, bulge, segments) {
+  const theta = 4 * Math.atan(bulge);
+  const dx = x2 - x1, dy = y2 - y1;
+  const chord = Math.hypot(dx, dy);
+  if (chord < 1e-9 || Math.abs(theta) < 1e-9) return [[x2, y2]];
+  const radius = Math.abs(chord / (2 * Math.sin(theta / 2)));
+  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+  const sagittaSign = theta > 0 ? 1 : -1;
+  const perp = Math.sqrt(Math.max(radius * radius - (chord / 2) * (chord / 2), 0));
+  const nx = -dy / chord, ny = dx / chord;
+  const cx = mx - nx * perp * sagittaSign;
+  const cy = my - ny * perp * sagittaSign;
+  const a1 = Math.atan2(y1 - cy, x1 - cx);
+  const n = Math.max(4, Math.ceil(Math.abs(theta) / (Math.PI / segments)));
+  const pts = [];
+  for (let k = 1; k <= n; k++) {
+    const a = a1 + (theta * k) / n;
+    pts.push([cx + radius * Math.cos(a), cy + radius * Math.sin(a)]);
+  }
+  pts[pts.length - 1] = [x2, y2];
+  return pts;
+}
+
+function extractSegments(dxfText) {
+  const pairs = parseDxfPairs(dxfText);
+  const segments = [];
+  let insunits = null;
+
+  for (let i = 0; i < pairs.length - 2; i++) {
+    if (pairs[i][0] === 9 && pairs[i][1].trim() === '$INSUNITS') {
+      for (let j = i + 1; j < Math.min(i + 6, pairs.length); j++) {
+        if (pairs[j][0] === 70) { insunits = parseInt(pairs[j][1], 10); break; }
+      }
+      break;
+    }
+  }
+
+  let start = -1, end = -1;
+  for (let i = 0; i < pairs.length; i++) {
+    if (pairs[i][0] === 2 && pairs[i][1].trim() === 'ENTITIES') { start = i; break; }
+  }
+  if (start === -1) return { segments: [], insunits };
+  for (let i = start; i < pairs.length; i++) {
+    if (pairs[i][0] === 0 && pairs[i][1].trim() === 'ENDSEC') { end = i; break; }
+  }
+  if (end === -1) end = pairs.length;
+
+  let i = start;
+  while (i < end) {
+    const [code, val] = pairs[i];
+    if (code === 0 && val.trim() === 'LINE') {
+      let j = i + 1;
+      const d = {};
+      while (j < end && pairs[j][0] !== 0) { d[pairs[j][0]] = pairs[j][1]; j++; }
+      if (d[10] !== undefined && d[20] !== undefined && d[11] !== undefined && d[21] !== undefined) {
+        segments.push({ x1: parseFloat(d[10]), y1: parseFloat(d[20]), x2: parseFloat(d[11]), y2: parseFloat(d[21]) });
+      }
+      i = j;
+    } else if (code === 0 && val.trim() === 'LWPOLYLINE') {
+      let j = i + 1;
+      let closed = false;
+      const rawVerts = [];
+      let vx = null, vy = null, vb = 0;
+      while (j < end && pairs[j][0] !== 0) {
+        const c = pairs[j][0], v = pairs[j][1];
+        if (c === 70) closed = (parseInt(v, 10) & 1) === 1;
+        if (c === 10) { if (vx !== null) rawVerts.push({ x: vx, y: vy, bulge: vb }); vx = parseFloat(v); vb = 0; }
+        if (c === 20) vy = parseFloat(v);
+        if (c === 42) vb = parseFloat(v);
+        j++;
+      }
+      if (vx !== null) rawVerts.push({ x: vx, y: vy, bulge: vb });
+      for (let k = 0; k < rawVerts.length - (closed ? 0 : 1); k++) {
+        const a = rawVerts[k], b = rawVerts[(k + 1) % rawVerts.length];
+        if (Math.abs(a.bulge) > 1e-9) {
+          const pts = bulgeToArcPoints(a.x, a.y, b.x, b.y, a.bulge, 16);
+          let px = a.x, py = a.y;
+          for (const p of pts) { segments.push({ x1: px, y1: py, x2: p[0], y2: p[1] }); px = p[0]; py = p[1]; }
+        } else {
+          segments.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y });
+        }
+      }
+      i = j;
+    } else if (code === 0 && val.trim() === 'POLYLINE') {
+      let j = i + 1;
+      let closed = false;
+      while (j < end && pairs[j][0] !== 0) {
+        if (pairs[j][0] === 70) closed = (parseInt(pairs[j][1], 10) & 1) === 1;
+        j++;
+      }
+      const verts = [];
+      while (j < end && !(pairs[j][0] === 0 && pairs[j][1].trim() === 'SEQEND')) {
+        if (pairs[j][0] === 0 && pairs[j][1].trim() === 'VERTEX') {
+          let k = j + 1; let vx = null, vy = null, vb = 0;
+          while (k < end && pairs[k][0] !== 0) {
+            if (pairs[k][0] === 10) vx = parseFloat(pairs[k][1]);
+            if (pairs[k][0] === 20) vy = parseFloat(pairs[k][1]);
+            if (pairs[k][0] === 42) vb = parseFloat(pairs[k][1]);
+            k++;
+          }
+          verts.push({ x: vx, y: vy, bulge: vb });
+          j = k;
+        } else j++;
+      }
+      for (let k = 0; k < verts.length - (closed ? 0 : 1); k++) {
+        const a = verts[k], b = verts[(k + 1) % verts.length];
+        segments.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y });
+      }
+      while (j < end && !(pairs[j][0] === 0 && pairs[j][1].trim() === 'SEQEND')) j++;
+      i = j + 1;
+    } else {
+      i++;
+    }
+  }
+  return { segments, insunits };
+}
+
+function keyPt(p, nd) {
+  const f = Math.pow(10, nd);
+  return Math.round(p[0] * f) / f + ',' + Math.round(p[1] * f) / f;
+}
+function snapPoint(p, nd) {
+  const f = Math.pow(10, nd);
+  return [Math.round(p[0] * f) / f, Math.round(p[1] * f) / f];
+}
+function dist(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1]); }
+
+function onSegmentParam(p, a, b, tol) {
+  const ax = a[0], ay = a[1], bx = b[0], by = b[1], px = p[0], py = p[1];
+  const len = Math.hypot(bx - ax, by - ay);
+  if (len < 1e-9) return null;
+  const cross = (bx - ax) * (py - ay) - (by - ay) * (px - ax);
+  if (Math.abs(cross) / len > tol) return null;
+  const dot = (px - ax) * (bx - ax) + (py - ay) * (by - ay);
+  const t = dot / (len * len);
+  if (t < -1e-6 || t > 1 + 1e-6) return null;
+  return t;
+}
+
+function buildPlanarGraph(rawSegments, nd) {
+  nd = nd || 6;
+  const tol = 1e-6;
+  const ptMap = new Map();
+  const segs = rawSegments.map(s => {
+    const a = snapPoint([s.x1, s.y1], nd);
+    const b = snapPoint([s.x2, s.y2], nd);
+    ptMap.set(keyPt(a, nd), a);
+    ptMap.set(keyPt(b, nd), b);
+    return [a, b];
+  }).filter(s => dist(s[0], s[1]) > 1e-6);
+
+  const allPts = Array.from(ptMap.values());
+  const edgeSet = new Map();
+  for (const [a, b] of segs) {
+    const onPts = [];
+    for (const p of allPts) {
+      const t = onSegmentParam(p, a, b, tol);
+      if (t !== null) onPts.push([t, p]);
+    }
+    onPts.sort((u, v) => u[0] - v[0]);
+    const chain = [];
+    for (const [, p] of onPts) {
+      if (chain.length === 0 || keyPt(chain[chain.length - 1], nd) !== keyPt(p, nd)) chain.push(p);
+    }
+    for (let k = 0; k < chain.length - 1; k++) {
+      const p1 = chain[k], p2 = chain[k + 1];
+      const k1 = keyPt(p1, nd), k2 = keyPt(p2, nd);
+      if (k1 === k2) continue;
+      const edgeKey = k1 < k2 ? k1 + '|' + k2 : k2 + '|' + k1;
+      if (!edgeSet.has(edgeKey)) edgeSet.set(edgeKey, [p1, p2]);
+    }
+  }
+
+  const adjacency = new Map();
+  const pointsByKey = new Map();
+  for (const [p1, p2] of edgeSet.values()) {
+    const k1 = keyPt(p1, nd), k2 = keyPt(p2, nd);
+    pointsByKey.set(k1, p1); pointsByKey.set(k2, p2);
+    if (!adjacency.has(k1)) adjacency.set(k1, []);
+    if (!adjacency.has(k2)) adjacency.set(k2, []);
+    adjacency.get(k1).push(k2);
+    adjacency.get(k2).push(k1);
+  }
+  for (const [k, neighbors] of adjacency) {
+    const p0 = pointsByKey.get(k);
+    neighbors.sort((ka, kb) => {
+      const pa = pointsByKey.get(ka), pb = pointsByKey.get(kb);
+      return Math.atan2(pa[1] - p0[1], pa[0] - p0[0]) - Math.atan2(pb[1] - p0[1], pb[0] - p0[0]);
+    });
+  }
+  return { adjacency, pointsByKey, edges: Array.from(edgeSet.values()) };
+}
+
+function signedArea(poly) {
+  let s = 0;
+  const n = poly.length;
+  for (let i = 0; i < n; i++) {
+    const [x1, y1] = poly[i], [x2, y2] = poly[(i + 1) % n];
+    s += x1 * y2 - x2 * y1;
+  }
+  return s / 2;
+}
+
+function traceFaces(graph) {
+  const { adjacency, pointsByKey } = graph;
+  const visited = new Set();
+  const facesCCW = [];
+  const facesCW = [];
+  for (const [k1, neighbors] of adjacency) {
+    for (const k2 of neighbors) {
+      const startDir = k1 + '->' + k2;
+      if (visited.has(startDir)) continue;
+      const faceKeys = [k1];
+      let curA = k1, curB = k2;
+      const firstDir = startDir;
+      let guard = 0;
+      while (guard++ < 5000) {
+        visited.add(curA + '->' + curB);
+        faceKeys.push(curB);
+        const nbrs = adjacency.get(curB);
+        const idx = nbrs.indexOf(curA);
+        const nxt = nbrs[(idx - 1 + nbrs.length) % nbrs.length];
+        curA = curB; curB = nxt;
+        if (curA + '->' + curB === firstDir) break;
+      }
+      faceKeys.pop();
+      const poly = faceKeys.map(k => pointsByKey.get(k));
+      const area = signedArea(poly);
+      if (Math.abs(area) < 1e-9) continue;
+      if (area > 0) facesCCW.push(poly); else facesCW.push(poly);
+    }
+  }
+  return { facesCCW, facesCW };
+}
+
+function cleanCollinear(poly, angleTolDeg) {
+  angleTolDeg = angleTolDeg === undefined ? 1.0 : angleTolDeg;
+  const n = poly.length;
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const p0 = poly[(i - 1 + n) % n], p1 = poly[i], p2 = poly[(i + 1) % n];
+    const v1 = [p0[0] - p1[0], p0[1] - p1[1]];
+    const v2 = [p2[0] - p1[0], p2[1] - p1[1]];
+    const cross = v1[0] * v2[1] - v1[1] * v2[0];
+    const dot = v1[0] * v2[0] + v1[1] * v2[1];
+    const ang = Math.atan2(Math.abs(cross), dot) * 180 / Math.PI;
+    if (ang > 180 - angleTolDeg) continue;
+    out.push(p1);
+  }
+  return out.length >= 3 ? out : poly;
+}
+
+function polygonSideLengths(poly) {
+  const n = poly.length;
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(dist(poly[i], poly[(i + 1) % n]));
+  return out;
+}
+function polygonAngles(poly) {
+  const n = poly.length;
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const p0 = poly[(i - 1 + n) % n], p1 = poly[i], p2 = poly[(i + 1) % n];
+    const v1 = [p0[0] - p1[0], p0[1] - p1[1]];
+    const v2 = [p2[0] - p1[0], p2[1] - p1[1]];
+    const m1 = Math.hypot(v1[0], v1[1]), m2 = Math.hypot(v2[0], v2[1]);
+    const dot = (v1[0] * v2[0] + v1[1] * v2[1]) / (m1 * m2);
+    out.push(Math.acos(Math.max(-1, Math.min(1, dot))) * 180 / Math.PI);
+  }
+  return out;
+}
+function round(v, d) { const f = Math.pow(10, d); return Math.round(v * f) / f; }
+
+function shapeSignature(poly) {
+  const n = poly.length;
+  const area = round(Math.abs(signedArea(poly)), 3);
+  const sides = polygonSideLengths(poly).map(v => round(v, 3)).sort((a, b) => a - b);
+  const angles = polygonAngles(poly).map(v => round(v, 1)).sort((a, b) => a - b);
+  return n + '|' + area + '|' + sides.join(',') + '|' + angles.join(',');
+}
+
+function guessShapeName(poly) {
+  const n = poly.length;
+  const angles = polygonAngles(poly).map(v => round(v, 0));
+  const sides = polygonSideLengths(poly).map(v => round(v, 3));
+  const allSidesEqual = sides.every(s => Math.abs(s - sides[0]) < 0.01);
+  const allAnglesRight = angles.every(a => Math.abs(a - 90) < 2);
+  if (n === 3) {
+    const s = [...sides].sort((a, b) => a - b);
+    const isRight = angles.some(a => Math.abs(a - 90) < 2);
+    const legsEqual = Math.abs(s[0] - s[1]) < 0.01;
+    if (isRight && legsEqual) return 'Right Isosceles Triangle';
+    if (isRight) return 'Right Triangle';
+    if (allSidesEqual) return 'Equilateral Triangle';
+    return 'Triangle';
+  }
+  if (n === 4) {
+    if (allAnglesRight && allSidesEqual) return 'Square';
+    if (allAnglesRight) return 'Rectangle';
+    if (allSidesEqual) return 'Diamond';
+    return 'Quadrilateral';
+  }
+  return n + '-gon';
+}
+
+function classifyPolygons(polys) {
+  const groups = new Map();
+  for (const poly of polys) {
+    const sig = shapeSignature(poly);
+    if (!groups.has(sig)) groups.set(sig, { signature: sig, polygons: [], representative: poly, name: guessShapeName(poly) });
+    groups.get(sig).polygons.push(poly);
+  }
+  return Array.from(groups.values()).sort((a, b) => Math.abs(signedArea(b.representative)) - Math.abs(signedArea(a.representative)));
+}
+
+function ensureCCW(poly) {
+  return signedArea(poly) < 0 ? [...poly].reverse() : poly;
+}
+function lineIntersect(p1, d1, p2, d2) {
+  const denom = d1[0] * d2[1] - d1[1] * d2[0];
+  if (Math.abs(denom) < 1e-12) return null;
+  const t = ((p2[0] - p1[0]) * d2[1] - (p2[1] - p1[1]) * d2[0]) / denom;
+  return [p1[0] + d1[0] * t, p1[1] + d1[1] * t];
+}
+function offsetPolygon(poly, distance, miterLimit) {
+  miterLimit = miterLimit === undefined ? 8 : miterLimit;
+  const p = ensureCCW(poly);
+  const n = p.length;
+  const offsetLines = [];
+  for (let i = 0; i < n; i++) {
+    const a = p[i], b = p[(i + 1) % n];
+    const dx = b[0] - a[0], dy = b[1] - a[1];
+    const len = Math.hypot(dx, dy);
+    const ux = dx / len, uy = dy / len;
+    const nx = uy, ny = -ux;
+    offsetLines.push({ pt: [a[0] + nx * distance, a[1] + ny * distance], dir: [ux, uy] });
+  }
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const prev = offsetLines[(i - 1 + n) % n];
+    const cur = offsetLines[i];
+    let ip = lineIntersect(prev.pt, prev.dir, cur.pt, cur.dir);
+    if (!ip) ip = cur.pt;
+    const orig = p[i];
+    const miterLen = dist(ip, orig);
+    if (miterLen > miterLimit * Math.abs(distance) + 1e-9) {
+      out.push(prev.pt);
+      out.push(cur.pt);
+    } else {
+      out.push(ip);
+    }
+  }
+  return out;
+}
+function polygonBounds(poly) {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const [x, y] of poly) { minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y); }
+  return { minX, minY, maxX, maxY, w: maxX - minX, h: maxY - minY };
+}
+
+function dxfEscape(s) { return String(s).replace(/[\r\n]/g, ' '); }
+
+// DXF R12 (AC1009) entity writers. R12 is the classic universal exchange format:
+// it needs no entity handles, owner pointers, or BLOCK_RECORD table, which stricter
+// R2000+ importers (Shapr3D included) require but which are easy to get wrong by hand.
+function writePolylineR12(layer, poly, closed, colorOverride) {
+  const lines = [];
+  const header = ['0', 'POLYLINE', '8', layer];
+  if (colorOverride !== undefined) header.push('62', String(colorOverride));
+  header.push('66', '1', '70', closed ? '1' : '0');
+  lines.push(...header);
+  for (const [x, y] of poly) {
+    lines.push('0', 'VERTEX', '8', layer, '10', x.toFixed(6), '20', y.toFixed(6), '30', '0');
+  }
+  lines.push('0', 'SEQEND');
+  return lines;
+}
+function writeText(layer, text, x, y, height) {
+  const lines = [];
+  lines.push('0', 'TEXT', '8', layer, '10', x.toFixed(6), '20', y.toFixed(6), '30', '0');
+  lines.push('40', height.toFixed(6), '1', dxfEscape(text));
+  return lines;
+}
+function buildDxf(entitiesLineArrays, layers, extents) {
+  const L = [];
+  const push = (...args) => { for (const a of args) L.push(String(a)); };
+  push(0, 'SECTION', 2, 'HEADER');
+  push(9, '$ACADVER', 1, 'AC1009');
+  push(9, '$INSUNITS', 70, 1);
+  if (extents) {
+    push(9, '$INSBASE', 10, '0.0', 20, '0.0', 30, '0.0');
+    push(9, '$EXTMIN', 10, extents.minX.toFixed(6), 20, extents.minY.toFixed(6), 30, '0.0');
+    push(9, '$EXTMAX', 10, extents.maxX.toFixed(6), 20, extents.maxY.toFixed(6), 30, '0.0');
+  }
+  push(0, 'ENDSEC');
+  push(0, 'SECTION', 2, 'TABLES');
+  push(0, 'TABLE', 2, 'LAYER', 70, layers.length);
+  for (const layer of layers) push(0, 'LAYER', 2, layer.name, 70, 0, 62, layer.colorIndex, 6, 'CONTINUOUS');
+  push(0, 'ENDTAB');
+  push(0, 'ENDSEC');
+  push(0, 'SECTION', 2, 'BLOCKS');
+  push(0, 'ENDSEC');
+  push(0, 'SECTION', 2, 'ENTITIES');
+  for (const arr of entitiesLineArrays) for (const s of arr) L.push(String(s));
+  push(0, 'ENDSEC');
+  push(0, 'EOF');
+  return L.join('\r\n') + '\r\n';
+}
+
+function estimateTextWidth(text, fontHeight) {
+  return text.length * fontHeight * 0.62;
+}
+
+function layoutTemplates(groups, offsetDistance, options) {
+  options = options || {};
+  const gap = options.gap !== undefined ? options.gap : 0.75;
+  const labelHeight = options.labelHeight !== undefined ? options.labelHeight : 0.16;
+  const labelHeight2 = 0.12;
+  const labelLineGap = 0.06;
+  const labelBlockHeight = labelHeight + labelLineGap + labelHeight2 + 0.08; // total vertical room reserved below each shape
+  const columns = options.columns || 4;
+  const allowance = options.allowanceForLabel !== undefined ? options.allowanceForLabel : offsetDistance;
+
+  const items = groups.map(g => {
+    const offsetPoly = offsetPolygon(g.representative, offsetDistance, options.miterLimit);
+    const bounds = polygonBounds(offsetPoly);
+    const sides = polygonSideLengths(g.representative).map(v => round(v, 3));
+    const uniqueSides = Array.from(new Set(sides.map(s => s.toFixed(3))));
+    const label1 = g.name + ' x' + g.polygons.length;
+    const label2 = 'sides ' + uniqueSides.join('/') + '"';
+    const labelW = Math.max(estimateTextWidth(label1, labelHeight), estimateTextWidth(label2, labelHeight2));
+    const colWidth = Math.max(bounds.w, labelW);
+    return { group: g, offsetPoly, bounds, colWidth };
+  });
+
+  let x = 0, y = 0, rowHeight = 0, col = 0;
+  const placed = [];
+  for (const item of items) {
+    const w = item.bounds.w, h = item.bounds.h, colWidth = item.colWidth;
+    if (col >= columns) { col = 0; x = 0; y -= (rowHeight + labelBlockHeight + gap); rowHeight = 0; }
+    // left-align both the shape and its label to the column's left edge (x) so neither
+    // can overflow into the next column, regardless of which one (shape or label text) is wider.
+    const dx = x - item.bounds.minX;
+    const dy = y - item.bounds.maxY;
+    const movedOffset = item.offsetPoly.map(([px, py]) => [px + dx, py + dy]);
+    const movedOriginal = item.group.representative.map(([px, py]) => [px + dx, py + dy]);
+    placed.push({
+      group: item.group,
+      offsetPoly: movedOffset,
+      originalPoly: movedOriginal,
+      labelPos: [x, y - h - labelHeight - 0.06],
+      labelMaxWidth: colWidth,
+      bounds: { minX: x, minY: y - h, maxX: x + w, maxY: y, w, h }
+    });
+    x += colWidth + gap;
+    rowHeight = Math.max(rowHeight, h);
+    col++;
+  }
+  return placed;
+}
+
+function sanitizeLayerName(name, maxLen) {
+  maxLen = maxLen || 31; // DXF R12 symbol table name limit
+  let s = String(name).toUpperCase().replace(/[^A-Z0-9_$-]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+  if (s.length > maxLen) s = s.slice(0, maxLen);
+  return s || 'LAYER';
+}
+
+// Shapr3D's DXF importer (and many others) does not support TEXT/annotation entities -
+// only lines, polylines, arcs, circles/ellipses. So piece identity is encoded as a per-piece
+// LAYER NAME (which importers do read) rather than as DXF TEXT, which caused import failures.
+// Cut line and stitch line for a given piece share ONE layer (distinguished by entity color only)
+// so both curves land in the same sketch/selection in Shapr3D — letting you extrude the ring
+// between them (the seam allowance itself) as a single operation instead of two disconnected ones.
+function generateOutputDxf(placedItems, options) {
+  options = options || {};
+  const includeSeamLine = options.includeSeamLine !== undefined ? options.includeSeamLine : true;
+  const includeDxfText = options.includeDxfText === true; // opt-in only; off by default for Shapr3D compatibility
+  const allowance = options.allowance;
+  const layerMap = new Map(); // name -> colorIndex (layer's own default color; entities still carry explicit color)
+  const entityArrays = [];
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  const extend = (poly) => { for (const [x, y] of poly) { minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y); } };
+
+  placedItems.forEach((item, idx) => {
+    const layer = sanitizeLayerName((idx + 1) + '_' + item.group.name, 31);
+    layerMap.set(layer, 7);
+
+    extend(item.offsetPoly);
+    entityArrays.push(writePolylineR12(layer, item.offsetPoly, true, 1));  // cut line, red
+    if (includeSeamLine) entityArrays.push(writePolylineR12(layer, item.originalPoly, true, 5)); // stitch line, blue
+
+    if (includeDxfText) {
+      const sides = polygonSideLengths(item.originalPoly).map(v => round(v, 3));
+      const uniqueSides = Array.from(new Set(sides.map(s => s.toFixed(3))));
+      const label1 = item.group.name + ' - cut ' + item.group.polygons.length;
+      const label2 = 'sides ' + uniqueSides.join('/') + 'in  +' + allowance + 'in allowance';
+      entityArrays.push(writeText(layer, label1, item.labelPos[0], item.labelPos[1], 0.15));
+      entityArrays.push(writeText(layer, label2, item.labelPos[0], item.labelPos[1] - 0.22, 0.11));
+    }
+  });
+
+  const layers = Array.from(layerMap, ([name, colorIndex]) => ({ name, colorIndex }));
+  const extents = isFinite(minX) ? { minX, minY, maxX, maxY } : null;
+  return buildDxf(entityArrays, layers, extents);
+}
+
+function generateOutputSvg(placedItems, options) {
+  options = options || {};
+  const includeSeamLine = options.includeSeamLine !== undefined ? options.includeSeamLine : true;
+  const includeLabels = options.includeLabels !== undefined ? options.includeLabels : true;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  placedItems.forEach(it => {
+    minX = Math.min(minX, it.bounds.minX); minY = Math.min(minY, it.bounds.minY - 0.5);
+    maxX = Math.max(maxX, it.bounds.maxX); maxY = Math.max(maxY, it.bounds.maxY);
+  });
+  const pad = 0.3;
+  const w = (maxX - minX) + pad * 2, h = (maxY - minY) + pad * 2;
+  const flipY = (y) => (maxY + pad) - y; // flip so +y is up, svg y-down
+  const toX = (x) => x - minX + pad;
+  let body = '';
+  placedItems.forEach(item => {
+    const cutPts = item.offsetPoly.map(([x, y]) => toX(x) + ',' + flipY(y)).join(' ');
+    body += `<polygon points="${cutPts}" fill="none" stroke="#c8433a" stroke-width="0.02"/>\n`;
+    if (includeSeamLine) {
+      const seamPts = item.originalPoly.map(([x, y]) => toX(x) + ',' + flipY(y)).join(' ');
+      body += `<polygon points="${seamPts}" fill="none" stroke="#33608f" stroke-width="0.015" stroke-dasharray="0.05,0.04"/>\n`;
+    }
+    if (includeLabels) {
+      const lx = toX(item.labelPos[0]), ly = flipY(item.labelPos[1]);
+      body += `<text x="${lx}" y="${ly}" font-size="0.14" font-family="monospace" fill="#1c1a14">${item.group.name} - cut ${item.group.polygons.length}</text>\n`;
+    }
+  });
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}in" height="${h}in">\n<rect width="${w}" height="${h}" fill="#faf7ef"/>\n${body}</svg>`;
+}
+
+window.Engine = {
+  extractSegments, buildPlanarGraph, traceFaces, cleanCollinear,
+  classifyPolygons, shapeSignature, guessShapeName, signedArea,
+  offsetPolygon, polygonBounds, polygonSideLengths, polygonAngles, round,
+  layoutTemplates, generateOutputDxf, generateOutputSvg
+};
+})();
+
+/* =========================================================================
+   APP — UI wiring
+   ========================================================================= */
+(function(){
+  const E = window.Engine;
+
+  const PALETTE = ['#c8433a','#33608f','#5c9e6d','#d68a2c','#8a5fa8','#c2678a','#3d8f8a','#9a7b3d'];
+
+  const state = {
+    rawSegments: null,
+    groups: null,
+    placed: null,
+    fileName: null,
+    hoveredGroupIdx: null
+  };
+
+  const el = id => document.getElementById(id);
+  const dropzone = el('dropzone'), fileInput = el('fileInput'), browseBtn = el('browseBtn');
+  const filebar = el('filebar'), fname = el('fname'), errorBox = el('errorBox');
+  const summary = el('summary'), panels = el('panels');
+  const sourceCanvas = el('sourceCanvas'), outputCanvas = el('outputCanvas');
+  const sourceLegend = el('sourceLegend'), sourceTip = el('sourceTip'), outputTip = el('outputTip');
+  const shapeTableBody = el('shapeTableBody');
+  const allowanceInput = el('allowance'), scaleInput = el('scale'), columnsInput = el('columns'), gapInput = el('gap');
+  const includeSeamInput = el('includeSeam'), includeLabelsInput = el('includeLabels'), includeDxfTextInput = el('includeDxfText');
+  const downloadDxfBtn = el('downloadDxfBtn'), downloadSvgBtn = el('downloadSvgBtn');
+
+  // ---------- ruler divider ----------
+  function drawRuler() {
+    const svg = el('rulerSvg');
+    const w = svg.clientWidth || svg.parentElement.clientWidth || 1180;
+    svg.setAttribute('viewBox', `0 0 ${w} 22`);
+    let s = '';
+    const step = 8;
+    for (let x = 0; x <= w; x += step) {
+      const isMajor = (x / step) % 10 === 0;
+      const isMid = (x / step) % 5 === 0;
+      const h = isMajor ? 16 : (isMid ? 11 : 6);
+      s += `<line x1="${x}" y1="0" x2="${x}" y2="${h}" stroke="#eab53d" stroke-width="1" opacity="${isMajor?0.9:0.45}"/>`;
+    }
+    s += `<line x1="0" y1="0" x2="${w}" y2="0" stroke="#eab53d" stroke-width="1" opacity="0.9"/>`;
+    svg.innerHTML = s;
+  }
+  drawRuler();
+  window.addEventListener('resize', drawRuler);
+
+  // ---------- file handling ----------
+  browseBtn.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('click', (e) => { if (e.target !== browseBtn) fileInput.click(); });
+  dropzone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+  ['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.remove('drag'); }));
+  dropzone.addEventListener('drop', (e) => { const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.classList.add('show');
+    summary.classList.remove('show');
+    panels.classList.remove('show');
+  }
+  function clearError() { errorBox.classList.remove('show'); errorBox.textContent = ''; }
+
+  function handleFile(file) {
+    clearError();
+    state.fileName = file.name;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        processDxfText(reader.result);
+        fname.textContent = file.name;
+        filebar.classList.add('show');
+      } catch (err) {
+        console.error(err);
+        showError('Could not parse this file: ' + err.message + '. Check that it is a text-based DXF (not binary) with geometry in the ENTITIES section.');
+      }
+    };
+    reader.onerror = () => showError('Could not read the file from disk.');
+    reader.readAsText(file);
+  }
+
+  function processDxfText(text) {
+    const { segments, insunits } = E.extractSegments(text);
+    if (!segments || segments.length === 0) {
+      showError('No LINE, LWPOLYLINE, or POLYLINE geometry found in the ENTITIES section of this DXF. Arcs/splines-only or block-INSERT-only drawings aren\u2019t supported yet.');
+      return;
+    }
+    state.rawSegments = segments;
+    state.insunits = insunits;
+    recompute();
+  }
+
+  function scaledSegments() {
+    const scale = parseFloat(scaleInput.value) || 1;
+    if (scale === 1) return state.rawSegments;
+    return state.rawSegments.map(s => ({ x1: s.x1*scale, y1: s.y1*scale, x2: s.x2*scale, y2: s.y2*scale }));
+  }
+
+  function recompute() {
+    if (!state.rawSegments) return;
+    clearError();
+    const segs = scaledSegments();
+    const graph = E.buildPlanarGraph(segs);
+    const { facesCCW, facesCW } = E.traceFaces(graph);
+
+    if (facesCCW.length === 0) {
+      showError('The line segments in this DXF don\u2019t form any fully closed regions \u2014 there may be gaps between piece edges. Every piece boundary needs to connect end-to-end.');
+      return;
+    }
+
+    const cleaned = facesCCW.map(f => E.cleanCollinear(f));
+    const groups = E.classifyPolygons(cleaned);
+    state.groups = groups;
+
+    const allowance = parseFloat(allowanceInput.value) || 0;
+    const columns = Math.max(1, parseInt(columnsInput.value) || 4);
+    const gap = Math.max(0, parseFloat(gapInput.value) || 0.75);
+    const placed = E.layoutTemplates(groups, allowance, { columns, gap });
+    state.placed = placed;
+
+    renderSummary(facesCCW.length, groups.length);
+    renderSourceLegend(groups);
+    renderTable(groups, allowance);
+    renderSourceCanvas(cleaned, groups);
+    renderOutputCanvas(placed);
+
+    summary.classList.add('show');
+    panels.classList.add('show');
+  }
+
+  function renderSummary(pieceCount, groupCount) {
+    summary.innerHTML = `
+      <div class="stat"><div class="num">${pieceCount}</div><div class="lbl">Pieces found</div></div>
+      <div class="stat"><div class="num">${groupCount}</div><div class="lbl">Unique sizes</div></div>
+      <div class="stat"><div class="num">${state.insunits === 1 ? 'in' : (state.insunits ? 'code '+state.insunits : '\u2014')}</div><div class="lbl">DXF units</div></div>
+    `;
+  }
+
+  function renderSourceLegend(groups) {
+    sourceLegend.innerHTML = groups.slice(0, 8).map((g, i) =>
+      `<span title="${g.name}"><i style="background:${PALETTE[i % PALETTE.length]}"></i>${i + 1}</span>`
+    ).join('');
+  }
+
+  function renderTable(groups, allowance) {
+    shapeTableBody.innerHTML = groups.map((g, i) => {
+      const color = PALETTE[i % PALETTE.length];
+      const sides = E.polygonSideLengths(g.representative).map(v => E.round(v, 3));
+      const uniqueSides = Array.from(new Set(sides.map(s => s.toFixed(3))));
+      const offPoly = E.offsetPolygon(g.representative, allowance);
+      const b0 = E.polygonBounds(g.representative);
+      const b1 = E.polygonBounds(offPoly);
+      return `<tr>
+        <td style="color:var(--ink-soft)">${i + 1}</td>
+        <td><span class="swatch" style="background:${color}"></span></td>
+        <td class="shape-name">${g.name}</td>
+        <td>${g.polygons.length}</td>
+        <td>${uniqueSides.join(' / ')}" &middot; ${E.round(b0.w,2)}"&times;${E.round(b0.h,2)}"</td>
+        <td>${E.round(b1.w,2)}"&times;${E.round(b1.h,2)}"</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ---------- canvas rendering ----------
+  function fitTransform(bounds, canvasW, canvasH, pad) {
+    const w = bounds.w || 1, h = bounds.h || 1;
+    const sx = (canvasW - pad * 2) / w, sy = (canvasH - pad * 2) / h;
+    const s = Math.min(sx, sy);
+    const offX = pad + (canvasW - pad * 2 - w * s) / 2 - bounds.minX * s;
+    const offY = pad + (canvasH - pad * 2 - h * s) / 2 + bounds.maxY * s;
+    return { s, toPx: (x, y) => [offX + x * s, offY - y * s] };
+  }
+
+  function overallBounds(polys) {
+    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    for (const p of polys) for (const [x,y] of p) { minX=Math.min(minX,x); minY=Math.min(minY,y); maxX=Math.max(maxX,x); maxY=Math.max(maxY,y); }
+    return { minX, minY, maxX, maxY, w: maxX-minX, h: maxY-minY };
+  }
+
+  let sourcePiecesForHit = [];
+  function renderSourceCanvas(polys, groups) {
+    const canvas = sourceCanvas;
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || 560, cssH = 480;
+    canvas.width = cssW * dpr; canvas.height = cssH * dpr;
+    canvas.style.height = cssH + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+
+    const bounds = overallBounds(polys);
+    const { s, toPx } = fitTransform(bounds, cssW, cssH, 24);
+
+    // group index lookup per polygon
+    const groupColorOf = new Map();
+    groups.forEach((g, gi) => { g.polygons.forEach(p => groupColorOf.set(p, PALETTE[gi % PALETTE.length])); });
+
+    sourcePiecesForHit = [];
+    polys.forEach(poly => {
+      const color = groupColorOf.get(poly) || '#999';
+      ctx.beginPath();
+      poly.forEach(([x,y], i) => { const [px,py] = toPx(x,y); if (i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py); });
+      ctx.closePath();
+      ctx.fillStyle = color + '33';
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+      sourcePiecesForHit.push({ poly, color, screenPts: poly.map(([x,y]) => toPx(x,y)) });
+    });
+
+    canvas.onmousemove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      let hit = null;
+      for (const p of sourcePiecesForHit) if (pointInPoly(mx,my,p.screenPts)) { hit = p; break; }
+      if (hit) {
+        const gi = groups.findIndex(g => g.polygons.includes(hit.poly));
+        const g = groups[gi];
+        sourceTip.innerHTML = `<b>${g.name}</b> &middot; group ${gi+1} of ${groups.length} &middot; appears ${g.polygons.length}&times; in the pattern`;
+      } else {
+        sourceTip.textContent = 'Hover a piece to see which size group it belongs to.';
+      }
+    };
+  }
+
+  function truncateToWidth(ctx, text, maxWidth) {
+    if (maxWidth <= 0) return '';
+    if (ctx.measureText(text).width <= maxWidth) return text;
+    let lo = 0, hi = text.length;
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      const candidate = text.slice(0, mid) + '\u2026';
+      if (ctx.measureText(candidate).width <= maxWidth) lo = mid; else hi = mid - 1;
+    }
+    return lo === 0 ? '' : text.slice(0, lo) + '\u2026';
+  }
+
+  function pointInPoly(x, y, pts) {
+    let inside = false;
+    for (let i=0, j=pts.length-1; i<pts.length; j=i++) {
+      const xi=pts[i][0], yi=pts[i][1], xj=pts[j][0], yj=pts[j][1];
+      const intersect = ((yi>y) !== (yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  function renderOutputCanvas(placed) {
+    const canvas = outputCanvas;
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || 560, cssH = 480;
+    canvas.width = cssW * dpr; canvas.height = cssH * dpr;
+    canvas.style.height = cssH + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+
+    if (!placed.length) return;
+    const allPolys = [];
+    placed.forEach(it => { allPolys.push(it.offsetPoly); });
+    const bounds = overallBounds(allPolys);
+    const { s, toPx } = fitTransform(bounds, cssW, cssH, 24);
+    const labelFontPx = Math.max(8, Math.min(13, 0.16 * s));
+
+    placed.forEach(item => {
+      ctx.beginPath();
+      item.offsetPoly.forEach(([x,y], i) => { const [px,py]=toPx(x,y); if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py); });
+      ctx.closePath();
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--cut').trim() || '#c8433a';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+
+      if (includeSeamInput.checked) {
+        ctx.beginPath();
+        item.originalPoly.forEach(([x,y], i) => { const [px,py]=toPx(x,y); if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py); });
+        ctx.closePath();
+        ctx.setLineDash([4,3]);
+        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--seam').trim() || '#33608f';
+        ctx.lineWidth = 1.1;
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      if (includeLabelsInput.checked) {
+        const [lx, ly] = toPx(item.labelPos[0], item.labelPos[1]);
+        ctx.fillStyle = '#5a5548';
+        ctx.font = labelFontPx + 'px "IBM Plex Mono", monospace';
+        const fullLabel = item.group.name + ' \u00d7' + item.group.polygons.length;
+        const maxPx = (item.labelMaxWidth || item.bounds.w) * s;
+        ctx.fillText(truncateToWidth(ctx, fullLabel, maxPx), lx, ly);
+      }
+    });
+
+    outputTip.textContent = placed.length + ' template' + (placed.length===1?'':'s') + ' on the sheet \u2014 red is the cut line, blue dashed is the finished (stitch) line.';
+  }
+
+  // ---------- control changes ----------
+  [allowanceInput, scaleInput, columnsInput, gapInput].forEach(inp => inp.addEventListener('input', recompute));
+  [includeSeamInput, includeLabelsInput].forEach(inp => inp.addEventListener('change', () => { if (state.placed) renderOutputCanvas(state.placed); }));
+
+  // ---------- downloads ----------
+  function currentOptions() {
+    return {
+      allowance: parseFloat(allowanceInput.value) || 0,
+      includeSeamLine: includeSeamInput.checked,
+      includeLabels: includeLabelsInput.checked,
+      includeDxfText: includeDxfTextInput.checked
+    };
+  }
+
+  function download(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  downloadDxfBtn.addEventListener('click', () => {
+    if (!state.placed) return;
+    const dxf = E.generateOutputDxf(state.placed, currentOptions());
+    const base = (state.fileName || 'pattern').replace(/\.dxf$/i, '');
+    download(base + '_templates.dxf', dxf, 'application/dxf');
+  });
+  downloadSvgBtn.addEventListener('click', () => {
+    if (!state.placed) return;
+    const svg = E.generateOutputSvg(state.placed, currentOptions());
+    const base = (state.fileName || 'pattern').replace(/\.dxf$/i, '');
+    download(base + '_templates.svg', svg, 'image/svg+xml');
+  });
+
+  window.addEventListener('resize', () => {
+    if (state.groups) { renderSourceCanvas(state.groups.flatMap(g=>g.polygons), state.groups); renderOutputCanvas(state.placed); }
+  });
+
+})();
+</script>
+</body>
+</html>
