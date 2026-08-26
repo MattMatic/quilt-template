@@ -425,6 +425,39 @@
       <p class="download-note">Each piece is one layer (e.g. "3_RIGHT_ISOSCELES_TRIANGLE") holding both the cut line and stitch line, so you can select the whole layer in Shapr3D and extrude the ring between them as the seam allowance in one step.</p>
     </div>
 
+    <div class="section-divider">
+      <p class="eyebrow" style="margin-top:36px;">3D-printable seam allowance templates</p>
+    </div>
+    <div class="controls">
+      <div class="field">
+        <label for="thickness">Template thickness (mm)</label>
+        <input type="number" id="thickness" value="4" step="0.1" min="0.1">
+        <div class="hint">1/6" ≈ 4.23mm, if that's the exact fraction you want</div>
+      </div>
+    </div>
+    <div class="download-bar">
+      <button class="btn" id="downloadStlBtn">Download STL</button>
+      <button class="btn ghost" id="downloadStepBtn">Download STEP</button>
+      <p class="download-note">Solid 3D models of just the seam-allowance ring (the space between the stitch line and cut line), extruded to the thickness above — one watertight solid per unique piece, laid out on a single non-overlapping plate. STEP is a true CAD solid (verified importable in a real CAD kernel); STL is a triangulated mesh for slicers.</p>
+    </div>
+
+    <div class="section-divider">
+      <p class="eyebrow" style="margin-top:36px;">Print at home (actual size)</p>
+    </div>
+    <div class="controls">
+      <div class="field">
+        <label for="pageSize">Page size</label>
+        <select id="pageSize">
+          <option value="letter">Letter (8.5×11")</option>
+          <option value="a4">A4 (210×297mm)</option>
+        </select>
+      </div>
+    </div>
+    <div class="download-bar">
+      <button class="btn" id="downloadPdfBtn">Download Print PDF</button>
+      <p class="download-note">One template per unique piece, printed at true 100% scale with both the cut line and stitch line, packed across as many pages as needed. Pieces too large for one page are automatically tiled with a registration mark to line up. Every page includes a 1" calibration line — measure it before cutting to confirm your printer didn't rescale the page.</p>
+    </div>
+
   </section>
 
   <footer>
@@ -434,6 +467,22 @@
   </footer>
 
 </div>
+
+<!--
+  earcut v3.2.3 — polygon triangulation (used for STL mesh generation).
+  ISC License. Copyright (c) 2026, Mapbox.
+  Permission to use, copy, modify, and/or distribute this software for any purpose
+  with or without fee is hereby granted, provided that the above copyright notice
+  and this permission notice appear in all copies.
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+  REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+  FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+  INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+  OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+  TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+  THIS SOFTWARE.
+-->
+<script>!function(t,n){"object"==typeof exports&&"undefined"!=typeof module?n(exports):"function"==typeof define&&define.amd?define(["exports"],n):n((t="undefined"!=typeof globalThis?globalThis:t||self).earcut={})}(this,function(t){"use strict";const n=new Set;let e=!1;function r(t,n,e,r,x){let o=null;if(x===G(t,n,e,r)>0)for(let x=n;x<e;x+=r)o=C(x/r|0,t[x],t[x+1],o);else for(let x=e-r;x>=n;x-=r)o=C(x/r|0,t[x],t[x+1],o);return o&&O(o,o.next)&&(D(o),o=o.next),o}function x(t,r=t){const x=r===t;let o,i=t;do{o=!1,i===i.next||0!==n.size&&n.has(i)||!O(i,i.next)&&0!==_(i.prev,i,i.next)?(x||i!==r)&&(i=i.next,o=!x):((x||i===r)&&(r=i.prev),e=!0,D(i),i=i.prev,o=!0)}while(o||i!==r);return r}function o(t,n,r,o,c){c&&function(t,n,e,r){let x=t,o=0;do{x.z=j(x.x,x.y,n,e,r),Z[o++]=x,x=x.next}while(x!==t);!function(t){if(t<=32){for(let n=1;n<t;n++){const t=Z[n],e=t.z;let r=n-1;for(;r>=0&&Z[r].z>e;)Z[r+1]=Z[r],r--;Z[r+1]=t}return}b.length<t&&(b=new Uint32Array(t),z=new Uint32Array(t),A=new Array(t));for(let n=0;n<t;n++)b[n]=Z[n].z;I(t,Z,b,A,z,0),I(t,A,z,Z,b,8),I(t,Z,b,A,z,16),I(t,A,z,Z,b,24)}(o);let i=null;for(let t=0;t<o;t++){const n=Z[t];n.prevZ=i,i&&(i.nextZ=n),i=n}i.nextZ=null}(t,r,o,c);let y=t,s=!1;for(;t.prev!==t.next;){const a=t.prev,h=t.next;if(_(a,t,h)<0&&(c?l(t,r,o,c):i(t)))n.push(a.i,t.i,h.i),D(t),t=h,y=h;else if((t=h)===y){if(e=!1,t=x(t),e){y=t;continue}if(!s){y=t=f(t,n),s=!0;continue}u(t,n,r,o,c);break}}}function i(t){const n=t.prev,e=t,r=t.next,x=n.x,o=e.x,i=r.x,l=n.y,f=e.y,u=r.y,c=Math.min(x,o,i),y=Math.min(l,f,u),s=Math.max(x,o,i),a=Math.max(l,f,u);let h=r.next;for(;h!==n;){if(h.x>=c&&h.x<=s&&h.y>=y&&h.y<=a&&(x!==h.x||l!==h.y)&&F(x,l,o,f,i,u,h.x,h.y)&&_(h.prev,h,h.next)>=0)return!1;h=h.next}return!0}function l(t,n,e,r){const x=t.prev,o=t,i=t.next,l=x.x,f=o.x,u=i.x,c=x.y,y=o.y,s=i.y,a=Math.min(l,f,u),h=Math.min(c,y,s),p=Math.max(l,f,u),v=Math.max(c,y,s),d=j(a,h,n,e,r),M=j(p,v,n,e,r);let w=t.prevZ;for(;w&&w.z>=d;){if(w.x>=a&&w.x<=p&&w.y>=h&&w.y<=v&&w!==i&&(l!==w.x||c!==w.y)&&F(l,c,f,y,u,s,w.x,w.y)&&_(w.prev,w,w.next)>=0)return!1;w=w.prevZ}let g=t.nextZ;for(;g&&g.z<=M;){if(g.x>=a&&g.x<=p&&g.y>=h&&g.y<=v&&g!==i&&(l!==g.x||c!==g.y)&&F(l,c,f,y,u,s,g.x,g.y)&&_(g.prev,g,g.next)>=0)return!1;g=g.nextZ}return!0}function f(t,n){let e=t,r=!1;do{const x=e.prev,o=e.next.next;P(x,e,e.next,o,!1)&&q(x,o)&&q(o,x)&&(n.push(x.i,e.i,o.i),D(e),D(e.next),e=t=o,r=!0),e=e.next}while(e!==t);return r?x(e):e}function u(t,n,e,r,i){let l=t;do{let t=l.next.next;for(;t!==l.prev;){if(l.i!==t.i&&T(l,t)){let f=B(l,t);return l=x(l,l.next),f=x(f,f.next),o(l,n,e,r,i),void o(f,n,e,r,i)}t=t.next}l=l.next}while(l!==t)}let c=!1;function y(t,n){return t.x-n.x||t.y-n.y||(t.next.y-t.y)/(t.next.x-t.x)-(n.next.y-n.y)/(n.next.x-n.x)}function s(t,n){const e=function(t,n){let e=n;const r=t.x,x=t.y;let o,i=-1/0;if(O(t,e))return e;for(let n=0,l=0;n<p;n++,l+=4){if(x<h[l+1]||x>h[l+3]||h[l]>r||h[l+2]<=i)continue;const f=w(n);e=g(n);do{if(e.prev.next===e){if(O(t,e.next))return e.next;if(x<=e.y&&x>=e.next.y&&e.next.y!==e.y){const t=e.x+(x-e.y)*(e.next.x-e.x)/(e.next.y-e.y);if(t<=r&&t>i&&(i=t,o=e.x<e.next.x?e:e.next,t===r))return o}}e=e.next}while(e!==f)}if(!o)return null;const l=o.x,f=o.y,u=Math.min(x,f),c=Math.max(x,f);let y=1/0;for(let n=0,s=0;n<p;n++,s+=4){if(h[s+2]<l||h[s]>r||h[s+3]<u||h[s+1]>c)continue;const a=w(n);e=g(n);do{if(e.prev.next===e&&r>=e.x&&e.x>=l&&r!==e.x&&F(x<f?r:i,x,l,f,x<f?i:r,x,e.x,e.y)){const n=Math.abs(x-e.y)/(r-e.x);(q(e,t)||e.y===x&&e.next.y===x&&e.next.x>r)&&(n<y||n===y&&(e.x>o.x||e.x===o.x&&m(o,e)))&&(o=e,y=n)}e=e.next}while(e!==a)}return o}(t,n);if(!e)return n;const r=B(e,t);return M(e,r.next.next),x(r,r.next),x(e,e.next)}const a=16;let h=new Float64Array(0),p=0;const v=[],d=[];function M(t,n){let e=t;do{const t=p++;v[t]=e;let r=1/0,x=1/0,o=-1/0,i=-1/0,l=0;do{const n=e.next;e.z=t,e.x<r&&(r=e.x),e.x>o&&(o=e.x),e.y<x&&(x=e.y),e.y>i&&(i=e.y),n.x<r&&(r=n.x),n.x>o&&(o=n.x),n.y<x&&(x=n.y),n.y>i&&(i=n.y),e=n}while(++l<a&&e!==n);d[t]=e;const f=4*t;h[f]=r,h[f+1]=x,h[f+2]=o,h[f+3]=i}while(e!==n)}function w(t){let n=d[t];for(;n.prev.next!==n;)n=n.next;return d[t]=n,n}function g(t){let n=v[t];for(;n.prev.next!==n;)n=n.next;return v[t]=n,n}function m(t,n){return _(t.prev,t,n.prev)<0&&_(n.next,t,t.next)<0}const Z=[];let A=[],b=new Uint32Array(0),z=new Uint32Array(0);const U=new Uint32Array(256);function I(t,n,e,r,x,o){U.fill(0);for(let n=0;n<t;n++)U[e[n]>>>o&255]++;let i=0;for(let t=0;t<256;t++){const n=U[t];U[t]=i,i+=n}for(let i=0;i<t;i++){const t=e[i],l=U[t>>>o&255]++;r[l]=n[i],x[l]=t}}function j(t,n,e,r,x){return(t=1431655765&((t=858993459&((t=252645135&((t=16711935&((t=(t-e)*x|0)|t<<8))|t<<4))|t<<2))|t<<1))|(n=1431655765&((n=858993459&((n=252645135&((n=16711935&((n=(n-r)*x|0)|n<<8))|n<<4))|n<<2))|n<<1))<<1}function k(t){let n=t,e=t;do{(n.x<e.x||n.x===e.x&&n.y<e.y)&&(e=n),n=n.next}while(n!==t);return e}function F(t,n,e,r,x,o,i,l){return(x-i)*(n-l)>=(t-i)*(o-l)&&(t-i)*(r-l)>=(e-i)*(n-l)&&(e-i)*(o-l)>=(x-i)*(r-l)}function T(t,n){const e=O(t,n)&&_(t.prev,t,t.next)>0&&_(n.prev,n,n.next)>0;return t.next.i!==n.i&&(e||q(t,n)&&q(n,t)&&(0!==_(t.prev,t,n.prev)||0!==_(t,n.prev,n)))&&!function(t,n){const e=Math.min(t.x,n.x),r=Math.max(t.x,n.x),x=Math.min(t.y,n.y),o=Math.max(t.y,n.y);let i=t;do{const l=i.next;if(i.x>r&&l.x>r||i.x<e&&l.x<e||i.y>o&&l.y>o||i.y<x&&l.y<x)i=l;else{if(i.i!==t.i&&l.i!==t.i&&i.i!==n.i&&l.i!==n.i&&P(i,l,t,n))return!0;i=l}}while(i!==t);return!1}(t,n)&&(e||function(t,n){let e=t,r=!1;const x=(t.x+n.x)/2,o=(t.y+n.y)/2;do{const t=e.next;e.y>o!=t.y>o&&x<(t.x-e.x)*(o-e.y)/(t.y-e.y)+e.x&&(r=!r),e=t}while(e!==t);return r}(t,n))}function _(t,n,e){return(n.y-t.y)*(e.x-n.x)-(n.x-t.x)*(e.y-n.y)}function O(t,n){return t.x===n.x&&t.y===n.y}function P(t,n,e,r,x=!0){const o=_(t,n,e),i=_(t,n,r),l=_(e,r,t),f=_(e,r,n);return(o>0&&i<0||o<0&&i>0)&&(l>0&&f<0||l<0&&f>0)||!!x&&(!(0!==o||!S(t,e,n))||(!(0!==i||!S(t,r,n))||(!(0!==l||!S(e,t,r))||!(0!==f||!S(e,n,r)))))}function S(t,n,e){return n.x<=Math.max(t.x,e.x)&&n.x>=Math.min(t.x,e.x)&&n.y<=Math.max(t.y,e.y)&&n.y>=Math.min(t.y,e.y)}function q(t,n){return _(t.prev,t,t.next)<0?_(t,n,t.next)>=0&&_(t,t.prev,n)>=0:_(t,n,t.prev)<0||_(t,t.next,n)<0}function B(t,n){const e=E(t.i,t.x,t.y),r=E(n.i,n.x,n.y),x=t.next,o=n.prev;return t.next=n,n.prev=t,e.next=x,x.prev=e,r.next=e,e.prev=r,o.next=r,r.prev=o,r}function C(t,n,e,r){const x=E(t,n,e);return r?(x.next=r.next,x.prev=r,r.next.prev=x,r.next=x):(x.prev=x,x.next=x),x}function D(t){t.next.prev=t.prev,t.prev.next=t.next,t.prevZ&&(t.prevZ.nextZ=t.nextZ),t.nextZ&&(t.nextZ.prevZ=t.prevZ),c&&function(t,n){const e=4*t.z;n.x<h[e]&&(h[e]=n.x),n.y<h[e+1]&&(h[e+1]=n.y),n.x>h[e+2]&&(h[e+2]=n.x),n.y>h[e+3]&&(h[e+3]=n.y)}(t.prev,t.next)}function E(t,n,e){return{i:t,x:n,y:e,prev:null,next:null,z:0,prevZ:null,nextZ:null}}function G(t,n,e,r){let x=0;for(let o=n,i=e-r;o<e;o+=r)x+=(t[i]-t[o])*(t[o+1]+t[i+1]),i=o;return x}let H,J,K,L,N,Q=0,R=0;function V(t,n,e,r,x,o){return(e-t)*(o-n)-(r-n)*(x-t)}function W(t,n,e,r,x,o,i,l){const f=t-i,u=n-l,c=e-i,y=r-l,s=x-i,a=o-l,h=f*f+u*u,p=c*c+y*y,v=s*s+a*a,d=h+p+v;return f*(y*v-p*a)-u*(c*v-p*s)+h*(c*a-y*s)<=1e-13*d*d}function X(t){return t-t%3+(t+1)%3}t.default=function(t,e,i=2){const l=e&&e.length,f=l?e[0]*i:t.length;n.size&&n.clear();let u=r(t,0,f,i,!0);const v=[];if(!u||u.next===u.prev)return v;let d=0,w=0,g=0;if(l&&(u=function(t,e,o,i){const l=[];for(let x=0,o=e.length;x<o;x++){const f=r(t,e[x]*i,x<o-1?e[x+1]*i:t.length,i,!1);f===f.next&&n.add(f),l.push(k(f))}l.sort(y),function(t,n){const e=Math.ceil((t+2*n)/a)+n+2;h.length<4*e&&(h=new Float64Array(4*e));p=0}(t.length/i,e.length),M(o,o),c=!0;for(let t=0;t<l.length;t++)o=s(l[t],o);return c=!1,x(o)}(t,e,u,i)),t.length>80*i){d=t[0],w=t[1];let n=d,e=w;for(let r=i;r<f;r+=i){const x=t[r],o=t[r+1];x<d&&(d=x),o<w&&(w=o),x>n&&(n=x),o>e&&(e=o)}g=Math.max(n-d,e-w),g=0!==g?32767/g:0}return o(u,v,d,w,g),v},t.deviation=function(t,n,e,r){const x=n&&n.length,o=x?n[0]*e:t.length;let i=Math.abs(G(t,0,o,e));if(x)for(let r=0,x=n.length;r<x;r++){const o=n[r]*e,l=r<x-1?n[r+1]*e:t.length;i-=Math.abs(G(t,o,l,e))}let l=0;for(let n=0;n<r.length;n+=3){const x=r[n]*e,o=r[n+1]*e,i=r[n+2]*e;l+=Math.abs((t[x]-t[i])*(t[o+1]-t[x+1])-(t[x]-t[o])*(t[i+1]-t[x+1]))}return 0===i&&0===l?0:Math.abs((l-i)/i)},t.flatten=function(t){const n=[],e=[],r=t[0][0].length;let x=0,o=0;for(const i of t){for(const t of i)for(let e=0;e<r;e++)n.push(t[e]);o&&(x+=o,e.push(x)),o=i.length}return{vertices:n,holes:e,dimensions:r}},t.refine=function(t,n,e=2){const r=t,x=r.length;if(x<6)return;!function(t){(!H||H.length<t)&&(H=new Int32Array(t));(!J||J.length<t)&&(J=new Int32Array(t));(!N||N.length<t)&&(N=new Uint8Array(t));let n=1;for(;n<4*t;)n<<=1;(!K||K.length<n)&&(K=new Int32Array(n),L=new Uint32Array(n));Q=n-1}(x),R++,J.fill(-1,0,x);let o=0;for(let t=0;t<x;t++){const n=r[t],e=r[X(t)],x=n<e?n:e,i=n<e?e:n;let l=(Math.imul(x,2654435761)^Math.imul(i,2246822507))&Q;for(;L[l]===R;){const n=K[l];if(-1!==n){const e=r[n],f=r[X(n)];if(e===x&&f===i||e===i&&f===x){J[t]=n,J[n]=t,K[l]=-1,N[n]=1,H[o++]=n;break}}l=l+1&Q}L[l]!==R&&(K[l]=t,L[l]=R)}for(;o>0;){const t=H[--o];N[t]=0;const x=J[t];if(-1===x)continue;const i=t-t%3,l=x-x%3,f=i+(t+2)%3,u=i+(t+1)%3,c=l+(x+2)%3,y=l+(x+1)%3,s=r[f],a=r[t],h=r[u],p=r[c],v=n[s*e],d=n[s*e+1],M=n[a*e],w=n[a*e+1],g=n[h*e],m=n[h*e+1],Z=n[p*e],A=n[p*e+1];if(!W(v,d,M,w,g,m,Z,A)&&V(v,d,M,w,Z,A)>0&&V(v,d,Z,A,g,m)>0){r[t]=p,r[x]=s;const n=J[c],e=J[f];J[t]=n,-1!==n&&(J[n]=t),J[x]=e,-1!==e&&(J[e]=x),J[f]=c,J[c]=f,-1!==n&&0===N[t]&&(N[t]=1,H[o++]=t),-1!==e&&0===N[x]&&(N[x]=1,H[o++]=x),-1!==J[u]&&0===N[u]&&(N[u]=1,H[o++]=u),-1!==J[y]&&0===N[y]&&(N[y]=1,H[o++]=y)}}},Object.defineProperty(t,"__esModule",{value:!0})});</script>
 
 <script>
 /* =========================================================================
@@ -997,6 +1046,485 @@ window.Engine = {
 })();
 
 /* =========================================================================
+   MESH / STL — triangulated watertight ring solid (seam allowance extruded)
+   ========================================================================= */
+(function(){
+const IN_TO_MM = 25.4;
+
+function dist3(a, b) { return Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]); }
+function signedAreaXY(poly) {
+  let s = 0; const n = poly.length;
+  for (let i = 0; i < n; i++) { const [x1,y1]=poly[i], [x2,y2]=poly[(i+1)%n]; s += x1*y2-x2*y1; }
+  return s/2;
+}
+function ensureOrientation(poly, wantCCW) {
+  const isCCW = signedAreaXY(poly) > 0;
+  return isCCW === wantCCW ? poly.slice() : [...poly].reverse();
+}
+
+// Builds a closed, watertight triangle mesh for the extruded ring solid (outer boundary minus hole
+// boundary), from z=0 to z=thicknessMM. Input rings are in INCHES; output vertices are in MM.
+function buildRingMesh(outerRingIn, holeRingIn, thicknessMM) {
+  const outer = ensureOrientation(outerRingIn, true);
+  const hole = ensureOrientation(holeRingIn, false);
+  const toMM = (p) => [p[0] * IN_TO_MM, p[1] * IN_TO_MM];
+  const outerMM = outer.map(toMM);
+  const holeMM = hole.map(toMM);
+
+  const flat = [];
+  for (const [x, y] of outerMM) flat.push(x, y);
+  const holeStart = outerMM.length;
+  for (const [x, y] of holeMM) flat.push(x, y);
+  const triIdx = earcut.default(flat, [holeStart], 2);
+  const pts2D = outerMM.concat(holeMM);
+
+  const vertices = [];
+  const triangles = [];
+  const addVert = (x, y, z) => { vertices.push([x, y, z]); return vertices.length - 1; };
+
+  const topBase = vertices.length;
+  for (const [x, y] of pts2D) addVert(x, y, thicknessMM);
+  for (let i = 0; i < triIdx.length; i += 3) {
+    let [a, b, c] = [triIdx[i], triIdx[i+1], triIdx[i+2]];
+    const [ax,ay]=pts2D[a], [bx,by]=pts2D[b], [cx,cy]=pts2D[c];
+    const area2 = (bx-ax)*(cy-ay) - (by-ay)*(cx-ax);
+    if (area2 < 0) { const t=b; b=c; c=t; }
+    triangles.push([topBase+a, topBase+b, topBase+c]);
+  }
+
+  const botBase = vertices.length;
+  for (const [x, y] of pts2D) addVert(x, y, 0);
+  for (let i = 0; i < triIdx.length; i += 3) {
+    let [a, b, c] = [triIdx[i], triIdx[i+1], triIdx[i+2]];
+    const [ax,ay]=pts2D[a], [bx,by]=pts2D[b], [cx,cy]=pts2D[c];
+    const area2 = (bx-ax)*(cy-ay) - (by-ay)*(cx-ax);
+    if (area2 < 0) { const t=b; b=c; c=t; }
+    triangles.push([botBase+a, botBase+c, botBase+b]);
+  }
+
+  function addWalls(ringMM) {
+    const n = ringMM.length;
+    const bIdx = [], tIdx = [];
+    for (const [x, y] of ringMM) bIdx.push(addVert(x, y, 0));
+    for (const [x, y] of ringMM) tIdx.push(addVert(x, y, thicknessMM));
+    for (let k = 0; k < n; k++) {
+      const k2 = (k+1) % n;
+      const A0=bIdx[k], B0=bIdx[k2], B1=tIdx[k2], A1=tIdx[k];
+      triangles.push([A0,B0,B1]);
+      triangles.push([A0,B1,A1]);
+    }
+  }
+  addWalls(outerMM);
+  addWalls(holeMM);
+
+  return { vertices, triangles };
+}
+
+function triangleNormal(v0, v1, v2) {
+  const ux=v1[0]-v0[0], uy=v1[1]-v0[1], uz=v1[2]-v0[2];
+  const vx=v2[0]-v0[0], vy=v2[1]-v0[1], vz=v2[2]-v0[2];
+  const nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+  const len = Math.hypot(nx,ny,nz) || 1;
+  return [nx/len, ny/len, nz/len];
+}
+
+function meshToAsciiSTLChunk(mesh, solidName) {
+  const lines = [`solid ${solidName}`];
+  for (const [i0,i1,i2] of mesh.triangles) {
+    const v0=mesh.vertices[i0], v1=mesh.vertices[i1], v2=mesh.vertices[i2];
+    const [nx,ny,nz] = triangleNormal(v0,v1,v2);
+    lines.push(`  facet normal ${nx.toExponential(6)} ${ny.toExponential(6)} ${nz.toExponential(6)}`);
+    lines.push('    outer loop');
+    for (const v of [v0,v1,v2]) lines.push(`      vertex ${v[0].toExponential(6)} ${v[1].toExponential(6)} ${v[2].toExponential(6)}`);
+    lines.push('    endloop');
+    lines.push('  endfacet');
+  }
+  lines.push(`endsolid ${solidName}`);
+  return lines.join('\n') + '\n';
+}
+
+// Generates one combined multi-solid ASCII STL from the app's placed sheet layout.
+function generateOutputSTL(placedItems, thicknessMM) {
+  let out = '';
+  placedItems.forEach((item, idx) => {
+    const mesh = buildRingMesh(item.offsetPoly, item.originalPoly, thicknessMM);
+    const name = (idx+1) + '_' + item.group.name.replace(/\s+/g, '_');
+    out += meshToAsciiSTLChunk(mesh, name);
+  });
+  return out;
+}
+
+window.Engine.buildRingMesh = buildRingMesh;
+window.Engine.generateOutputSTL = generateOutputSTL;
+})();
+
+/* =========================================================================
+   STEP — AP214 B-rep writer for the ring solid (real CAD solid geometry)
+   ========================================================================= */
+(function(){
+function fmtStep(x) {
+  if (Math.abs(x) < 1e-9) x = 0;
+  let s = x.toFixed(6);
+  s = s.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '.0');
+  if (!s.includes('.')) s += '.0';
+  return s;
+}
+class StepBuilder {
+  constructor() { this.id = 0; this.lines = []; }
+  next() { return ++this.id; }
+  add(entityStr) { const id = this.next(); this.lines.push(`#${id}=${entityStr};`); return id; }
+  point(x,y,z) { return this.add(`CARTESIAN_POINT('',(${fmtStep(x)},${fmtStep(y)},${fmtStep(z)}))`); }
+  direction(dx,dy,dz) {
+    const len = Math.hypot(dx,dy,dz) || 1;
+    return this.add(`DIRECTION('',(${fmtStep(dx/len)},${fmtStep(dy/len)},${fmtStep(dz/len)}))`);
+  }
+  vertexPoint(pointId) { return this.add(`VERTEX_POINT('',#${pointId})`); }
+  vector(dirId, mag) { return this.add(`VECTOR('',#${dirId},${fmtStep(mag)})`); }
+  line(pointId, vectorId) { return this.add(`LINE('',#${pointId},#${vectorId})`); }
+  edgeCurve(v1,v2,lineId) { return this.add(`EDGE_CURVE('',#${v1},#${v2},#${lineId},.T.)`); }
+  orientedEdge(edgeId, sense) { return this.add(`ORIENTED_EDGE('',*,*,#${edgeId},.${sense?'T':'F'}.)`); }
+  edgeLoop(ids) { return this.add(`EDGE_LOOP('',(${ids.map(i=>'#'+i).join(',')}))`); }
+  faceOuterBound(loopId) { return this.add(`FACE_OUTER_BOUND('',#${loopId},.T.)`); }
+  faceBound(loopId) { return this.add(`FACE_BOUND('',#${loopId},.T.)`); }
+  axis2Placement3D(o,z,x) { return this.add(`AXIS2_PLACEMENT_3D('',#${o},#${z},#${x})`); }
+  plane(axisId) { return this.add(`PLANE('',#${axisId})`); }
+  advancedFace(boundIds, planeId, sameSense) { return this.add(`ADVANCED_FACE('',(${boundIds.map(i=>'#'+i).join(',')}),#${planeId},.${sameSense?'T':'F'}.)`); }
+  closedShell(faceIds) { return this.add(`CLOSED_SHELL('',(${faceIds.map(i=>'#'+i).join(',')}))`); }
+  manifoldSolidBrep(shellId) { return this.add(`MANIFOLD_SOLID_BREP('',#${shellId})`); }
+}
+function dist3s(a,b) { return Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]); }
+function signedArea2s(poly) {
+  let s=0; const n=poly.length;
+  for (let i=0;i<n;i++){ const [x1,y1]=poly[i],[x2,y2]=poly[(i+1)%n]; s+=x1*y2-x2*y1; }
+  return s/2;
+}
+function ensureOrientS(poly, wantCCW) {
+  const isCCW = signedArea2s(poly) > 0;
+  return isCCW === wantCCW ? poly.slice() : [...poly].reverse();
+}
+function registerRing(sb, ring2D, z) {
+  const pointIds=[], vertexIds=[], coords=[];
+  for (const [x,y] of ring2D) {
+    const pid = sb.point(x,y,z);
+    const vid = sb.vertexPoint(pid);
+    pointIds.push(pid); vertexIds.push(vid); coords.push([x,y,z]);
+  }
+  return { pointIds, vertexIds, coords };
+}
+function registerRingEdges(sb, ring) {
+  const n = ring.coords.length;
+  const edgeIds = [];
+  for (let k=0;k<n;k++) {
+    const k2=(k+1)%n;
+    const a=ring.coords[k], b=ring.coords[k2];
+    const dirId = sb.direction(b[0]-a[0], b[1]-a[1], b[2]-a[2]);
+    const vecId = sb.vector(dirId, dist3s(a,b));
+    const lineId = sb.line(ring.pointIds[k], vecId);
+    edgeIds.push(sb.edgeCurve(ring.vertexIds[k], ring.vertexIds[k2], lineId));
+  }
+  return edgeIds;
+}
+function registerVerticalEdges(sb, botRing, topRing) {
+  const n = botRing.coords.length;
+  const edgeIds = [];
+  for (let k=0;k<n;k++) {
+    const a=botRing.coords[k], b=topRing.coords[k];
+    const dirId = sb.direction(b[0]-a[0], b[1]-a[1], b[2]-a[2]);
+    const vecId = sb.vector(dirId, dist3s(a,b));
+    const lineId = sb.line(botRing.pointIds[k], vecId);
+    edgeIds.push(sb.edgeCurve(botRing.vertexIds[k], topRing.vertexIds[k], lineId));
+  }
+  return edgeIds;
+}
+function buildRingSolidSTEP(sb, outerRingIn, holeRingIn, thicknessMM) {
+  const IN_TO_MM = 25.4;
+  const outer2D = ensureOrientS(outerRingIn, true).map(([x,y]) => [x*IN_TO_MM, y*IN_TO_MM]);
+  const hole2D = ensureOrientS(holeRingIn, false).map(([x,y]) => [x*IN_TO_MM, y*IN_TO_MM]);
+
+  const outerBot = registerRing(sb, outer2D, 0);
+  const outerTop = registerRing(sb, outer2D, thicknessMM);
+  const holeBot = registerRing(sb, hole2D, 0);
+  const holeTop = registerRing(sb, hole2D, thicknessMM);
+
+  const outerBotEdges = registerRingEdges(sb, outerBot);
+  const outerTopEdges = registerRingEdges(sb, outerTop);
+  const outerVertEdges = registerVerticalEdges(sb, outerBot, outerTop);
+  const holeBotEdges = registerRingEdges(sb, holeBot);
+  const holeTopEdges = registerRingEdges(sb, holeTop);
+  const holeVertEdges = registerVerticalEdges(sb, holeBot, holeTop);
+
+  const N = outer2D.length, M = hole2D.length;
+  const faces = [];
+
+  {
+    const outerLoop = sb.edgeLoop(outerTopEdges.map(e => sb.orientedEdge(e, true)));
+    const holeLoop = sb.edgeLoop(holeTopEdges.map(e => sb.orientedEdge(e, true)));
+    const zDir = sb.direction(0,0,1), xDir = sb.direction(1,0,0);
+    const axis = sb.axis2Placement3D(outerTop.pointIds[0], zDir, xDir);
+    const plane = sb.plane(axis);
+    faces.push(sb.advancedFace([sb.faceOuterBound(outerLoop), sb.faceBound(holeLoop)], plane, true));
+  }
+  {
+    const outerOriented = []; for (let k=N-1;k>=0;k--) outerOriented.push(sb.orientedEdge(outerBotEdges[k], false));
+    const holeOriented = []; for (let k=M-1;k>=0;k--) holeOriented.push(sb.orientedEdge(holeBotEdges[k], false));
+    const outerLoop = sb.edgeLoop(outerOriented);
+    const holeLoop = sb.edgeLoop(holeOriented);
+    const zDir = sb.direction(0,0,-1), xDir = sb.direction(1,0,0);
+    const axis = sb.axis2Placement3D(outerBot.pointIds[0], zDir, xDir);
+    const plane = sb.plane(axis);
+    faces.push(sb.advancedFace([sb.faceOuterBound(outerLoop), sb.faceBound(holeLoop)], plane, true));
+  }
+  function addWallFaces(ring2Dc, botRing, topRing, botEdges, topEdges, vertEdges) {
+    const n = ring2Dc.length;
+    for (let k=0;k<n;k++) {
+      const k2=(k+1)%n;
+      const loop = sb.edgeLoop([
+        sb.orientedEdge(botEdges[k], true),
+        sb.orientedEdge(vertEdges[k2], true),
+        sb.orientedEdge(topEdges[k], false),
+        sb.orientedEdge(vertEdges[k], false)
+      ]);
+      const a=ring2Dc[k], b=ring2Dc[k2];
+      const dx=b[0]-a[0], dy=b[1]-a[1];
+      const normalDir = sb.direction(dy, -dx, 0);
+      const xAxisDir = sb.direction(dx, dy, 0);
+      const axis = sb.axis2Placement3D(botRing.pointIds[k], normalDir, xAxisDir);
+      const plane = sb.plane(axis);
+      faces.push(sb.advancedFace([sb.faceOuterBound(loop)], plane, true));
+    }
+  }
+  addWallFaces(outer2D, outerBot, outerTop, outerBotEdges, outerTopEdges, outerVertEdges);
+  addWallFaces(hole2D, holeBot, holeTop, holeBotEdges, holeTopEdges, holeVertEdges);
+
+  const shell = sb.closedShell(faces);
+  return sb.manifoldSolidBrep(shell);
+}
+function buildStepFile(pieces, thicknessMM, fileNameLabel) {
+  const sb = new StepBuilder();
+  const solidIds = pieces.map(p => buildRingSolidSTEP(sb, p.outerRing, p.holeRing, thicknessMM));
+
+  const lengthUnitId = sb.add(`(LENGTH_UNIT()NAMED_UNIT(*)SI_UNIT(.MILLI.,.METRE.))`);
+  const angleUnitId = sb.add(`(NAMED_UNIT(*)PLANE_ANGLE_UNIT()SI_UNIT($,.RADIAN.))`);
+  const solidAngleUnitId = sb.add(`(NAMED_UNIT(*)SI_UNIT($,.STERADIAN.)SOLID_ANGLE_UNIT())`);
+  const uncertaintyId = sb.add(`UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(0.01),#${lengthUnitId},'distance_accuracy_value','confusion accuracy')`);
+  const geomContextId = sb.add(`(GEOMETRIC_REPRESENTATION_CONTEXT(3)GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#${uncertaintyId}))GLOBAL_UNIT_ASSIGNED_CONTEXT((#${lengthUnitId},#${angleUnitId},#${solidAngleUnitId}))REPRESENTATION_CONTEXT('','3D'))`);
+
+  const originId = sb.point(0,0,0);
+  const zDirId = sb.direction(0,0,1);
+  const xDirId = sb.direction(1,0,0);
+  const globalAxisId = sb.axis2Placement3D(originId, zDirId, xDirId);
+
+  const shapeRepId = sb.add(`ADVANCED_BREP_SHAPE_REPRESENTATION('${fileNameLabel}',(${solidIds.map(i=>'#'+i).join(',')},#${globalAxisId}),#${geomContextId})`);
+
+  const appContextId = sb.add(`APPLICATION_CONTEXT('automotive design')`);
+  sb.add(`APPLICATION_PROTOCOL_DEFINITION('international standard','automotive_design',2000,#${appContextId})`);
+  const prodContextId = sb.add(`PRODUCT_CONTEXT('',#${appContextId},'mechanical')`);
+  const productId = sb.add(`PRODUCT('${fileNameLabel}','${fileNameLabel}','',(#${prodContextId}))`);
+  const prodDefFormId = sb.add(`PRODUCT_DEFINITION_FORMATION('','',#${productId})`);
+  const prodDefContextId = sb.add(`PRODUCT_DEFINITION_CONTEXT('part definition',#${appContextId},'design')`);
+  const prodDefId = sb.add(`PRODUCT_DEFINITION('design','',#${prodDefFormId},#${prodDefContextId})`);
+  const prodDefShapeId = sb.add(`PRODUCT_DEFINITION_SHAPE('','',#${prodDefId})`);
+  sb.add(`SHAPE_DEFINITION_REPRESENTATION(#${prodDefShapeId},#${shapeRepId})`);
+
+  const header = [
+    'ISO-10303-21;','HEADER;',
+    `FILE_DESCRIPTION((''),'2;1');`,
+    `FILE_NAME('${fileNameLabel}.step','${new Date().toISOString().slice(0,19)}',(''),(''),'','','');`,
+    `FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));`,
+    'ENDSEC;','DATA;'
+  ];
+  const footer = ['ENDSEC;', 'END-ISO-10303-21;'];
+  return header.join('\n') + '\n' + sb.lines.join('\n') + '\n' + footer.join('\n') + '\n';
+}
+function generateOutputSTEP(placedItems, thicknessMM, fileNameLabel) {
+  const pieces = placedItems.map(item => ({ outerRing: item.offsetPoly, holeRing: item.originalPoly }));
+  return buildStepFile(pieces, thicknessMM, fileNameLabel || 'QuiltTemplates');
+}
+window.Engine.generateOutputSTEP = generateOutputSTEP;
+})();
+
+/* =========================================================================
+   PDF — print-at-home layout, page-bounded bin packing with oversize tiling
+   ========================================================================= */
+(function(){
+class PdfWriter {
+  constructor() { this.objects = []; }
+  addObject(body) { this.objects.push(body); return this.objects.length; }
+  build(catalogObjNum) {
+    const parts = [];
+    const offsets = [0];
+    let pos = 0;
+    const push = (s) => { parts.push(s); pos += unescape(encodeURIComponent(s)).length; };
+    push('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+    for (let i = 0; i < this.objects.length; i++) {
+      offsets.push(pos);
+      push(`${i+1} 0 obj\n${this.objects[i]}\nendobj\n`);
+    }
+    const xrefStart = pos;
+    let xref = `xref\n0 ${this.objects.length+1}\n0000000000 65535 f \n`;
+    for (let i = 1; i <= this.objects.length; i++) xref += String(offsets[i]).padStart(10,'0') + ' 00000 n \n';
+    push(xref);
+    push(`trailer\n<< /Size ${this.objects.length+1} /Root ${catalogObjNum} 0 R >>\nstartxref\n${xrefStart}\n%%EOF`);
+    return parts.join('');
+  }
+}
+function pdfEscapeString(s) { return String(s).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)'); }
+function buildPdf(pages) {
+  const w = new PdfWriter();
+  const fontObj = w.addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+  const fontBoldObj = w.addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');
+  const pagesObjNum = w.addObject('PLACEHOLDER');
+  const pageRefs = [];
+  for (const page of pages) {
+    const contentBody = page.ops;
+    const contentObjNum = w.addObject(`<< /Length ${unescape(encodeURIComponent(contentBody)).length} >>\nstream\n${contentBody}\nendstream`);
+    const pageObjNum = w.addObject(
+      `<< /Type /Page /Parent ${pagesObjNum} 0 R /MediaBox [0 0 ${page.widthPt} ${page.heightPt}] ` +
+      `/Resources << /Font << /F1 ${fontObj} 0 R /F2 ${fontBoldObj} 0 R >> >> /Contents ${contentObjNum} 0 R >>`
+    );
+    pageRefs.push(`${pageObjNum} 0 R`);
+  }
+  w.objects[pagesObjNum-1] = `<< /Type /Pages /Kids [ ${pageRefs.join(' ')} ] /Count ${pageRefs.length} >>`;
+  const catalogObjNum = w.addObject(`<< /Type /Catalog /Pages ${pagesObjNum} 0 R >>`);
+  return w.build(catalogObjNum);
+}
+function polygonBoundsOf(poly) {
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  for (const [x,y] of poly) { minX=Math.min(minX,x); minY=Math.min(minY,y); maxX=Math.max(maxX,x); maxY=Math.max(maxY,y); }
+  return { minX, minY, maxX, maxY, w:maxX-minX, h:maxY-minY };
+}
+function rotate90(poly) { return poly.map(([x,y]) => [-y, x]); }
+function clipPolygonToRect(poly, x0, y0, x1, y1) {
+  function clipEdge(pts, inside, intersect) {
+    const out = []; const n = pts.length;
+    for (let i=0;i<n;i++) {
+      const cur=pts[i], prev=pts[(i-1+n)%n];
+      const curIn=inside(cur), prevIn=inside(prev);
+      if (curIn) { if (!prevIn) out.push(intersect(prev,cur)); out.push(cur); }
+      else if (prevIn) out.push(intersect(prev,cur));
+    }
+    return out;
+  }
+  const lerp = (p,q,t) => [p[0]+(q[0]-p[0])*t, p[1]+(q[1]-p[1])*t];
+  let pts = poly;
+  pts = clipEdge(pts, p=>p[0]>=x0, (p,q)=>lerp(p,q,(x0-p[0])/(q[0]-p[0])));
+  pts = clipEdge(pts, p=>p[0]<=x1, (p,q)=>lerp(p,q,(x1-p[0])/(q[0]-p[0])));
+  pts = clipEdge(pts, p=>p[1]>=y0, (p,q)=>lerp(p,q,(y0-p[1])/(q[1]-p[1])));
+  pts = clipEdge(pts, p=>p[1]<=y1, (p,q)=>lerp(p,q,(y1-p[1])/(q[1]-p[1])));
+  return pts;
+}
+function packPiecesForPrint(pieces, printableW, printableH, gap) {
+  gap = gap === undefined ? 0.2 : gap;
+  const pages = [];
+  let curPage = [];
+  let cursorX=0, cursorY=0, shelfH=0;
+  function newPage(){ if (curPage.length) pages.push(curPage); curPage=[]; cursorX=0; cursorY=0; shelfH=0; }
+  for (const piece of pieces) {
+    const b0 = polygonBoundsOf(piece.outerPoly);
+    let outer=piece.outerPoly, inner=piece.innerPoly, bb=b0;
+    if (b0.w > printableW && b0.h <= printableW) {
+      const r = rotate90(piece.outerPoly);
+      const rb = polygonBoundsOf(r);
+      if (rb.w <= printableW) { outer=r; inner=rotate90(piece.innerPoly); bb=rb; }
+    }
+    const flip = ([x,y]) => [x-bb.minX, bb.maxY-y];
+    const outerFlipped = outer.map(flip);
+    const innerFlipped = inner.map(flip);
+    if (bb.w <= printableW+1e-6 && bb.h <= printableH+1e-6) {
+      if (cursorX+bb.w > printableW+1e-6) { cursorX=0; cursorY += shelfH+gap; shelfH=0; }
+      if (cursorY+bb.h > printableH+1e-6) newPage();
+      curPage.push({
+        outerPoly: outerFlipped.map(([x,y])=>[x+cursorX,y+cursorY]),
+        innerPoly: innerFlipped.map(([x,y])=>[x+cursorX,y+cursorY]),
+        label: piece.label, cutCount: piece.cutCount, tileInfo: null
+      });
+      cursorX += bb.w + gap;
+      shelfH = Math.max(shelfH, bb.h);
+    } else {
+      newPage();
+      const cols = Math.ceil(bb.w/printableW), rows = Math.ceil(bb.h/printableH);
+      for (let ry=0; ry<rows; ry++) {
+        for (let cx=0; cx<cols; cx++) {
+          const x0=cx*printableW, x1=x0+printableW, y0=ry*printableH, y1=y0+printableH;
+          const clippedOuter = clipPolygonToRect(outerFlipped, x0,y0,x1,y1);
+          const clippedInner = clipPolygonToRect(innerFlipped, x0,y0,x1,y1);
+          if (clippedOuter.length < 3 && clippedInner.length < 3) continue;
+          if (curPage.length) newPage();
+          const dx=-x0, dy=-y0;
+          curPage.push({
+            outerPoly: clippedOuter.map(([x,y])=>[x+dx,y+dy]),
+            innerPoly: clippedInner.map(([x,y])=>[x+dx,y+dy]),
+            label: piece.label, cutCount: piece.cutCount,
+            tileInfo: { row: ry, col: cx, rows, cols }
+          });
+        }
+      }
+      newPage();
+    }
+  }
+  if (curPage.length) pages.push(curPage);
+  return pages;
+}
+
+const PT_PER_IN = 72;
+function polyToPdfOps(poly, pageHeightIn) {
+  let s = '';
+  poly.forEach(([x, y], i) => {
+    const px = x * PT_PER_IN, py = (pageHeightIn - y) * PT_PER_IN;
+    s += (i === 0 ? `${px.toFixed(2)} ${py.toFixed(2)} m\n` : `${px.toFixed(2)} ${py.toFixed(2)} l\n`);
+  });
+  s += 'h S\n';
+  return s;
+}
+function textOp(x, y, pageHeightIn, text, size, font) {
+  const px = x * PT_PER_IN, py = (pageHeightIn - y) * PT_PER_IN;
+  return `BT /${font||'F1'} ${size} Tf ${px.toFixed(2)} ${py.toFixed(2)} Td (${pdfEscapeString(text)}) Tj ET\n`;
+}
+function buildPageOps(pageItems, pageWidthIn, pageHeightIn, marginIn, pageNum, totalPages) {
+  let ops = '';
+  const calX = marginIn, calY = marginIn * 0.6;
+  ops += '0 0 0 RG\n2 w\n';
+  ops += `${(calX*PT_PER_IN).toFixed(2)} ${((pageHeightIn-calY)*PT_PER_IN).toFixed(2)} m ${((calX+1)*PT_PER_IN).toFixed(2)} ${((pageHeightIn-calY)*PT_PER_IN).toFixed(2)} l S\n`;
+  ops += textOp(calX, calY - 0.12, pageHeightIn, 'exactly 1 inch: verify before cutting (print at 100%, no "fit to page")', 8, 'F2');
+  ops += textOp(pageWidthIn - marginIn - 1.3, pageHeightIn - marginIn*0.4, pageHeightIn, `Page ${pageNum} / ${totalPages}`, 8, 'F1');
+  for (const item of pageItems) {
+    const outer = item.outerPoly.map(([x,y]) => [x+marginIn, y+marginIn]);
+    const inner = item.innerPoly.map(([x,y]) => [x+marginIn, y+marginIn]);
+    ops += '0.784 0.263 0.227 RG\n1.2 w\n' + polyToPdfOps(outer, pageHeightIn);
+    if (inner.length >= 3) ops += '0.2 0.376 0.561 RG\n0.9 w\n' + polyToPdfOps(inner, pageHeightIn);
+    const b = polygonBoundsOf(outer);
+    let label = item.label;
+    if (item.tileInfo) label += ` (tile ${item.tileInfo.row*item.tileInfo.cols+item.tileInfo.col+1}/${item.tileInfo.rows*item.tileInfo.cols})`;
+    ops += '0 0 0 rg\n' + textOp(b.minX, b.maxY + 0.16, pageHeightIn, label, 8, 'F1');
+  }
+  return ops;
+}
+function generateOutputPDF(groups, allowanceIn, pageSize) {
+  const pageWIn = pageSize === 'a4' ? 8.2677 : 8.5;
+  const pageHIn = pageSize === 'a4' ? 11.6929 : 11;
+  const marginIn = 0.4;
+  const printableW = pageWIn - 2*marginIn;
+  const printableH = pageHIn - 2*marginIn - 0.35;
+
+  const pieces = groups.map(g => ({
+    outerPoly: window.Engine.offsetPolygon(g.representative, allowanceIn),
+    innerPoly: g.representative,
+    label: g.name + ' (cut ' + g.polygons.length + ')',
+    cutCount: g.polygons.length
+  }));
+  const pages = packPiecesForPrint(pieces, printableW, printableH, 0.3);
+  const pdfPages = pages.map((items, i) => ({
+    widthPt: pageWIn * PT_PER_IN,
+    heightPt: pageHIn * PT_PER_IN,
+    ops: buildPageOps(items, pageWIn, pageHIn, marginIn, i+1, pages.length)
+  }));
+  return buildPdf(pdfPages);
+}
+window.Engine.generateOutputPDF = generateOutputPDF;
+window.Engine.packPiecesForPrint = packPiecesForPrint;
+})();
+
+/* =========================================================================
    APP — UI wiring
    ========================================================================= */
 (function(){
@@ -1022,6 +1550,8 @@ window.Engine = {
   const allowanceInput = el('allowance'), scaleInput = el('scale'), columnsInput = el('columns'), gapInput = el('gap');
   const includeSeamInput = el('includeSeam'), includeLabelsInput = el('includeLabels'), includeDxfTextInput = el('includeDxfText');
   const downloadDxfBtn = el('downloadDxfBtn'), downloadSvgBtn = el('downloadSvgBtn');
+  const downloadStlBtn = el('downloadStlBtn'), downloadStepBtn = el('downloadStepBtn'), downloadPdfBtn = el('downloadPdfBtn');
+  const thicknessInput = el('thickness'), pageSizeInput = el('pageSize');
 
   // ---------- ruler divider ----------
   function drawRuler() {
@@ -1327,6 +1857,28 @@ window.Engine = {
     const svg = E.generateOutputSvg(state.placed, currentOptions());
     const base = (state.fileName || 'pattern').replace(/\.dxf$/i, '');
     download(base + '_templates.svg', svg, 'image/svg+xml');
+  });
+
+  downloadStlBtn.addEventListener('click', () => {
+    if (!state.placed) return;
+    const thickness = parseFloat(thicknessInput.value) || 4;
+    const stl = E.generateOutputSTL(state.placed, thickness);
+    const base = (state.fileName || 'pattern').replace(/\.dxf$/i, '');
+    download(base + '_templates.stl', stl, 'model/stl');
+  });
+  downloadStepBtn.addEventListener('click', () => {
+    if (!state.placed) return;
+    const thickness = parseFloat(thicknessInput.value) || 4;
+    const base = (state.fileName || 'pattern').replace(/\.dxf$/i, '');
+    const step = E.generateOutputSTEP(state.placed, thickness, base + '_templates');
+    download(base + '_templates.step', step, 'model/step');
+  });
+  downloadPdfBtn.addEventListener('click', () => {
+    if (!state.groups) return;
+    const allowance = parseFloat(allowanceInput.value) || 0;
+    const pdf = E.generateOutputPDF(state.groups, allowance, pageSizeInput.value);
+    const base = (state.fileName || 'pattern').replace(/\.dxf$/i, '');
+    download(base + '_print.pdf', pdf, 'application/pdf');
   });
 
   window.addEventListener('resize', () => {
